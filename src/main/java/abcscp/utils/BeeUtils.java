@@ -4,11 +4,11 @@ import java.util.BitSet;
 import java.util.List;
 import java.util.Random;
 
+import static abcscp.config.Parameters.COL_ADD_1;
+import static abcscp.config.Parameters.COL_ADD_2;
+import static abcscp.config.Parameters.COL_DROP_1;
+import static abcscp.config.Parameters.COL_DROP_2;
 import static abcscp.utils.CommonUtils.getColumns;
-import static abcscp.utils.Parameters.COL_ADD_1;
-import static abcscp.utils.Parameters.COL_ADD_2;
-import static abcscp.utils.Parameters.COL_DROP_1;
-import static abcscp.utils.Parameters.COL_DROP_2;
 
 public class BeeUtils {
     private static Random random = new Random();

@@ -10,11 +10,11 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static abcscp.utils.Parameters.GLOBAL_MIN;
-import static abcscp.utils.Parameters.GLOBAL_MINS;
-import static abcscp.utils.Parameters.MAX_CYCLE;
-import static abcscp.utils.Parameters.MEAN;
-import static abcscp.utils.Parameters.RUNTIME;
+import static abcscp.config.Parameters.MAX_CYCLE;
+import static abcscp.config.Parameters.RUNTIME;
+import static abcscp.config.Variables.GLOBAL_MIN;
+import static abcscp.config.Variables.GLOBAL_MINS;
+import static abcscp.config.Variables.MEAN;
 import static abcscp.utils.PrintUtils.printIterationResults;
 import static abcscp.utils.PrintUtils.printProgress;
 

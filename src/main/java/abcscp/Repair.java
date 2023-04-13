@@ -5,8 +5,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+import static abcscp.config.Parameters.Pa;
+import static abcscp.config.Variables.RANDOM;
 import static abcscp.utils.CommonUtils.uncoveredRowsStream;
-import static abcscp.utils.Parameters.Pa;
 import static abcscp.utils.RepairUtils.getColumnMaxRatio;
 import static abcscp.utils.RepairUtils.getColumnMinRatioStream;
 import static abcscp.utils.RepairUtils.selectRandomColumnFromRCL;
@@ -26,8 +27,7 @@ public class Repair {
     }
 
     private static void makeSolutionFeasible(BitSet solution, List<Integer> uncoveredRows) {
-//        double r = (Math.random() * 32767 / ((double) 32767 + (double) (1)));
-        double r = (random.nextDouble() * 100.0) / 100.0;
+        double r = (RANDOM.nextDouble() * 100.0) / 100.0;
         while (!uncoveredRows.isEmpty()) {
             int indexRowUncovered = uncoveredRows.get(0);
             int indexColumn;

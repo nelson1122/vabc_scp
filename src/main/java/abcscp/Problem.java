@@ -9,11 +9,11 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.logging.Logger;
 
-import static abcscp.utils.Parameters.COLUMNS;
-import static abcscp.utils.Parameters.COLUMNSCOVERINGROW;
-import static abcscp.utils.Parameters.COSTS;
-import static abcscp.utils.Parameters.ROWS;
-import static abcscp.utils.Parameters.ROWSCOVEREDBYCOLUMN;
+import static abcscp.config.Variables.COLUMNS;
+import static abcscp.config.Variables.COLUMNSCOVERINGROW;
+import static abcscp.config.Variables.COSTS;
+import static abcscp.config.Variables.ROWS;
+import static abcscp.config.Variables.ROWSCOVEREDBYCOLUMN;
 
 public class Problem {
 

@@ -3,11 +3,21 @@ package abcscp;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Random;
 import java.util.stream.IntStream;
 
 import static abcscp.Repair.applyRepairSolution;
 import static abcscp.Solution.createSolution;
+import static abcscp.config.Parameters.EMPLOYED_BEES;
+import static abcscp.config.Parameters.FOOD_NUMBER;
+import static abcscp.config.Parameters.LIMIT;
+import static abcscp.config.Parameters.ONLOOKER_BEES;
+import static abcscp.config.Variables.FITNESS;
+import static abcscp.config.Variables.FOODS;
+import static abcscp.config.Variables.GLOBAL_MIN;
+import static abcscp.config.Variables.GLOBAL_PARAMS;
+import static abcscp.config.Variables.PROB;
+import static abcscp.config.Variables.TRIAL;
 import static abcscp.utils.BeeUtils.addColumns;
 import static abcscp.utils.BeeUtils.dropColumns;
 import static abcscp.utils.CommonUtils.calculateFitnessOneStream;
@@ -16,17 +26,6 @@ import static abcscp.utils.CommonUtils.distinctColumnsStream;
 import static abcscp.utils.CommonUtils.getColumnsRandomFoodSource;
 import static abcscp.utils.CommonUtils.randomFoodSource;
 import static abcscp.utils.CommonUtils.uncoveredRowsStream;
-import static abcscp.utils.Parameters.EMPLOYED_BEES;
-import static abcscp.utils.Parameters.FITNESS;
-import static abcscp.utils.Parameters.FOODS;
-import static abcscp.utils.Parameters.FOOD_NUMBER;
-import static abcscp.utils.Parameters.GLOBAL_MIN;
-import static abcscp.utils.Parameters.GLOBAL_PARAMS;
-import static abcscp.utils.Parameters.LIMIT;
-import static abcscp.utils.Parameters.ONLOOKER_BEES;
-import static abcscp.utils.Parameters.PROB;
-import static abcscp.utils.Parameters.ROWS;
-import static abcscp.utils.Parameters.TRIAL;
 
 
 public class BeeColony {
@@ -48,20 +47,20 @@ public class BeeColony {
 
     public void sendEmployedBees() {
         for (int i = 0; i < EMPLOYED_BEES; i++) {
-            BitSet fs = (BitSet) FOODS.get(i).clone();
+            BitSet nfs = (BitSet) FOODS.get(i).clone();
 
             int rIndex = randomFoodSource(i);
             BitSet rfs = (BitSet) FOODS.get(rIndex).clone();
-            List<Integer> distinctColumns = distinctColumnsStream(fs, rfs);
+            List<Integer> distinctColumns = distinctColumnsStream(nfs, rfs);
 
             if (!distinctColumns.isEmpty()) {
-                addColumns(fs, distinctColumns);
-                dropColumns(fs);
-                List<Integer> uncoveredRows = uncoveredRowsStream(fs);
+                addColumns(nfs, distinctColumns);
+                dropColumns(nfs);
+                List<Integer> uncoveredRows = uncoveredRowsStream(nfs);
                 if (!uncoveredRows.isEmpty()) {
-                    applyRepairSolution(fs, uncoveredRows);
+                    applyRepairSolution(nfs, uncoveredRows);
                 }
-                memorizeSource(fs, i);
+                memorizeSource(nfs, i);
             } else {
                 generateScoutBee(i);
             }
@@ -69,8 +68,10 @@ public class BeeColony {
     }
 
     public void sendOnlookerBees() {
-        int i = 0, t = 0;
-        double r = (Math.random() * 32767 / ((double) (32767) + (double) (1)));
+        int i = 0;
+        int t = 0;
+//        double r = (Math.random() * 32767 / ((double) (32767) + (double) (1)));
+        double r = new Random().nextDouble() * 100.0 / 100.0;
         while (t < ONLOOKER_BEES) {
             if (r < PROB.get(i)) {
                 t++;

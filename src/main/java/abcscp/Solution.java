@@ -3,13 +3,13 @@ package abcscp;
 import java.util.BitSet;
 import java.util.List;
 
+import static abcscp.config.Parameters.RC_SIZE;
+import static abcscp.config.Variables.COLUMNS;
+import static abcscp.config.Variables.COLUMNSCOVERINGROW;
+import static abcscp.config.Variables.ROWS;
+import static abcscp.config.Variables.ROWSCOVEREDBYCOLUMN;
 import static abcscp.utils.CommonUtils.getColumns;
 import static abcscp.utils.CommonUtils.randomNumber;
-import static abcscp.utils.Parameters.COLUMNS;
-import static abcscp.utils.Parameters.COLUMNSCOVERINGROW;
-import static abcscp.utils.Parameters.RC_SIZE;
-import static abcscp.utils.Parameters.ROWS;
-import static abcscp.utils.Parameters.ROWSCOVEREDBYCOLUMN;
 
 
 public class Solution {

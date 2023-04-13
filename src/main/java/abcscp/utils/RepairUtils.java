@@ -6,12 +6,12 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static abcscp.config.Parameters.RC_SIZE;
+import static abcscp.config.Variables.COLUMNSCOVERINGROW;
+import static abcscp.config.Variables.COSTS;
+import static abcscp.config.Variables.ROWSCOVEREDBYCOLUMN;
 import static abcscp.utils.CommonUtils.getColumns;
 import static abcscp.utils.CommonUtils.randomNumber;
-import static abcscp.utils.Parameters.COLUMNSCOVERINGROW;
-import static abcscp.utils.Parameters.COSTS;
-import static abcscp.utils.Parameters.RC_SIZE;
-import static abcscp.utils.Parameters.ROWSCOVEREDBYCOLUMN;
 
 public class RepairUtils {
     private RepairUtils() {

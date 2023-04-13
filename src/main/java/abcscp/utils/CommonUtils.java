@@ -8,13 +8,13 @@ import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static abcscp.utils.Parameters.COLUMNS;
-import static abcscp.utils.Parameters.COLUMNSCOVERINGROW;
-import static abcscp.utils.Parameters.COSTS;
-import static abcscp.utils.Parameters.FOODS;
-import static abcscp.utils.Parameters.FOOD_NUMBER;
-import static abcscp.utils.Parameters.ROWS;
-import static abcscp.utils.Parameters.ROWSCOVEREDBYCOLUMN;
+import static abcscp.config.Parameters.FOOD_NUMBER;
+import static abcscp.config.Variables.COLUMNS;
+import static abcscp.config.Variables.COLUMNSCOVERINGROW;
+import static abcscp.config.Variables.COSTS;
+import static abcscp.config.Variables.FOODS;
+import static abcscp.config.Variables.ROWS;
+import static abcscp.config.Variables.ROWSCOVEREDBYCOLUMN;
 
 public class CommonUtils {
 
