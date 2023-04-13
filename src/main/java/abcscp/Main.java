@@ -91,11 +91,10 @@ public class Main {
         }
     */
     public static void main(String[] args) {
-
-        Variables v = new Variables();
-        Problem problem = new Problem(v);
-        BeeColony bee = new BeeColony(v);
-        PrintUtils pUtils = new PrintUtils(v);
+        Variables vr = new Variables();
+        Problem problem = new Problem(vr);
+        BeeColony bee = new BeeColony(vr);
+        PrintUtils pUtils = new PrintUtils(vr);
 
         File file = new File("src/main/resources/");
         List<String> fileNames =
@@ -120,8 +119,8 @@ public class Main {
                         bee.sendScoutBees();
                         pUtils.printProgress(run, iter);
                     }
-                    v.addGlobalMin(v.getGLOBAL_MIN());
-                    mean = mean + v.getGLOBAL_MIN();
+                    vr.addGlobalMin(vr.getGLOBAL_MIN());
+                    mean = mean + vr.getGLOBAL_MIN();
 
                     pUtils.printIterationResults(run);
                 }

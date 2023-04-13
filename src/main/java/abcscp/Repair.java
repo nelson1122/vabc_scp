@@ -12,12 +12,12 @@ import static abcscp.config.Parameters.Pa;
 
 
 public class Repair {
-    private Variables var;
+    private Variables vr;
     private CommonUtils cUtils;
     private RepairUtils rUtils;
 
     public Repair(Variables v) {
-        this.var = v;
+        this.vr = v;
         this.cUtils = new CommonUtils(v);
         this.rUtils = new RepairUtils(v);
     }
@@ -28,7 +28,7 @@ public class Repair {
     }
 
     private void makeSolutionFeasible(BitSet solution, List<Integer> uncoveredRows) {
-        double r = (var.getRANDOM().nextDouble() * 100.0) / 100.0;
+        double r = (vr.getRANDOM().nextDouble() * 100.0) / 100.0;
         while (!uncoveredRows.isEmpty()) {
             int indexRowUncovered = uncoveredRows.get(0);
             int indexColumn;

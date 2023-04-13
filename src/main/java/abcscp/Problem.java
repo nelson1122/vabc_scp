@@ -10,15 +10,16 @@ import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
 import java.util.logging.Logger;
+
 public class Problem {
 
-    private Variables var;
+    private Variables vr;
 
     public Problem() {
     }
 
-    public Problem(Variables v){
-        this.var = v;
+    public Problem(Variables v) {
+        this.vr = v;
     }
 
     static final Logger LOGGER = Logger.getLogger(Problem.class.getName());
@@ -29,36 +30,36 @@ public class Problem {
 
         File file = new File(filePath);
         Scanner scanner = new Scanner(file);
-        var.setROWS(scanner.nextInt());
-        var.setCOLUMNS(scanner.nextInt());
+        vr.setROWS(scanner.nextInt());
+        vr.setCOLUMNS(scanner.nextInt());
 
-        var.setCOSTS(new ArrayList<>());
-        var.setCOLUMNSCOVERINGROW(new ArrayList<>());
-        var.setROWSCOVEREDBYCOLUMN(new ArrayList<>());
+        vr.setCOSTS(new ArrayList<>());
+        vr.setCOLUMNSCOVERINGROW(new ArrayList<>());
+        vr.setROWSCOVEREDBYCOLUMN(new ArrayList<>());
 
-        for (int j = 0; j < var.getCOLUMNS(); j++) {
-            var.addCosts(scanner.nextInt());
+        for (int j = 0; j < vr.getCOLUMNS(); j++) {
+            vr.addCosts(scanner.nextInt());
         }
 
-        for (int i = 0; i < var.getROWS(); i++) {
+        for (int i = 0; i < vr.getROWS(); i++) {
             int numCol = scanner.nextInt();
             List<Integer> columns = new ArrayList<>();
             for (int j = 0; j < numCol; j++) {
                 int column = scanner.nextInt() - 1;
                 columns.add(column);
             }
-            var.addColumnsCoveringRow(columns);
+            vr.addColumnsCoveringRow(columns);
         }
 
-        for (int j = 0; j < var.getCOLUMNS(); j++) {
+        for (int j = 0; j < vr.getCOLUMNS(); j++) {
             List<Integer> rows = new ArrayList<>();
-            for (int i = 0; i < var.getROWS(); i++) {
-                List<Integer> columns = var.getColumnsCoveringRow(i);
+            for (int i = 0; i < vr.getROWS(); i++) {
+                List<Integer> columns = vr.getColumnsCoveringRow(i);
                 if (columns.contains(j)) {
                     rows.add(i);
                 }
             }
-            var.addRowsCoveredByColumn(rows);
+            vr.addRowsCoveredByColumn(rows);
         }
 
         scanner.close();
