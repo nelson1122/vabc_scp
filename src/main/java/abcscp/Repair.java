@@ -1,52 +1,53 @@
 package abcscp;
 
+import abcscp.config.Variables;
+import abcscp.utils.CommonUtils;
+import abcscp.utils.RepairUtils;
+
 import java.util.BitSet;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 
 import static abcscp.config.Parameters.Pa;
-import static abcscp.config.Variables.RANDOM;
-import static abcscp.utils.CommonUtils.uncoveredRowsStream;
-import static abcscp.utils.RepairUtils.getColumnMaxRatio;
-import static abcscp.utils.RepairUtils.getColumnMinRatioStream;
-import static abcscp.utils.RepairUtils.selectRandomColumnFromRCL;
 
 
 public class Repair {
-    private static long seed = System.currentTimeMillis();
-    private static Random random = new Random(seed);
+    private Variables var;
+    private CommonUtils cUtils;
+    private RepairUtils rUtils;
 
-    private Repair() {
-
+    public Repair(Variables v) {
+        this.var = v;
+        this.cUtils = new CommonUtils(v);
+        this.rUtils = new RepairUtils(v);
     }
 
-    public static void applyRepairSolution(BitSet solution, List<Integer> uncoveredRows) {
+    public void applyRepairSolution(BitSet solution, List<Integer> uncoveredRows) {
         makeSolutionFeasible(solution, uncoveredRows);
         removeRedundantColumnsRecursive(solution);
     }
 
-    private static void makeSolutionFeasible(BitSet solution, List<Integer> uncoveredRows) {
-        double r = (RANDOM.nextDouble() * 100.0) / 100.0;
+    private void makeSolutionFeasible(BitSet solution, List<Integer> uncoveredRows) {
+        double r = (var.getRANDOM().nextDouble() * 100.0) / 100.0;
         while (!uncoveredRows.isEmpty()) {
             int indexRowUncovered = uncoveredRows.get(0);
             int indexColumn;
             if (r < Pa) {
-                indexColumn = getColumnMinRatioStream(uncoveredRows, indexRowUncovered);
+                indexColumn = rUtils.getColumnMinRatioStream(uncoveredRows, indexRowUncovered);
             } else {
-                indexColumn = selectRandomColumnFromRCL(indexRowUncovered);
+                indexColumn = rUtils.selectRandomColumnFromRCL(indexRowUncovered);
             }
             solution.set(indexColumn);
-            uncoveredRows = uncoveredRowsStream(solution);
+            uncoveredRows = cUtils.uncoveredRowsStream(solution);
         }
     }
 
-    private static void removeRedundantColumns(BitSet solution) {
+    private void removeRedundantColumns(BitSet solution) {
         boolean feasible = true;
         while (feasible) {
-            int columnIndex = getColumnMaxRatio(solution);
+            int columnIndex = rUtils.getColumnMaxRatio(solution);
             solution.set(columnIndex, false);
-            List<Integer> uncoveredRows = uncoveredRowsStream(solution);
+            List<Integer> uncoveredRows = cUtils.uncoveredRowsStream(solution);
             if (!uncoveredRows.isEmpty()) {
                 solution.set(columnIndex);
                 feasible = false;
@@ -54,13 +55,13 @@ public class Repair {
         }
     }
 
-    private static void removeRedundantColumnsRecursive(BitSet solution) {
+    private void removeRedundantColumnsRecursive(BitSet solution) {
         solution.stream()
                 .boxed()
                 .sorted(Collections.reverseOrder())
                 .forEach(columnIndex -> {
                     solution.set(columnIndex, false);
-                    List<Integer> uncoveredRows = uncoveredRowsStream(solution);
+                    List<Integer> uncoveredRows = cUtils.uncoveredRowsStream(solution);
                     if (!uncoveredRows.isEmpty()) {
                         solution.set(columnIndex);
                     }

@@ -1,6 +1,7 @@
 package abc.scp;
 
 import java.util.Arrays;
+import java.util.Random;
 
 import static abc.scp.Commons.addColumnsToFoodSource;
 import static abc.scp.Commons.calculateFitnessPrimary;
@@ -23,7 +24,7 @@ import static abc.scp.Params.LIMIT;
 import static abc.scp.Params.ONLOOKER_BEES;
 import static abc.scp.Params.PROB;
 import static abc.scp.Params.TRIAL;
-import static abcscp.config.Variables.RANDOM;
+
 
 public class Bee {
     public Bee() {
@@ -84,7 +85,7 @@ public class Bee {
     public void sendOnlookerBees() {
         int i = 0, t = 0;
         while (t < ONLOOKER_BEES) {
-            double r = (RANDOM.nextDouble() * 100.0) / 100.0;
+            double r = (new Random().nextDouble() * 100.0) / 100.0;
             if (r < PROB[i]) {
                 t++;
 

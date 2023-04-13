@@ -1,40 +1,42 @@
 package abcscp;
 
+import abcscp.config.Variables;
+import abcscp.utils.CommonUtils;
+
 import java.util.BitSet;
 import java.util.List;
 
 import static abcscp.config.Parameters.RC_SIZE;
-import static abcscp.config.Variables.COLUMNS;
-import static abcscp.config.Variables.COLUMNSCOVERINGROW;
-import static abcscp.config.Variables.ROWS;
-import static abcscp.config.Variables.ROWSCOVEREDBYCOLUMN;
-import static abcscp.utils.CommonUtils.getColumns;
-import static abcscp.utils.CommonUtils.randomNumber;
 
 
 public class Solution {
 
-    private Solution() {
+    private Variables var;
+    private CommonUtils cUtils;
+
+    public Solution(Variables v) {
+        this.var = v;
+        this.cUtils = new CommonUtils(v);
     }
 
-    public static BitSet createSolution() {
-        BitSet solution = new BitSet(COLUMNS);
-        int[] U = new int[ROWS];
+    public BitSet createSolution() {
+        BitSet solution = new BitSet(var.getCOLUMNS());
+        int[] U = new int[var.getROWS()];
         generateSolution(solution, U);
         removeRedundantColumns(solution, U);
         return solution;
     }
 
-    private static void generateSolution(BitSet solution, int[] U) {
-        for (int i = 0; i < ROWS; i++) {
-            List<Integer> ai = COLUMNSCOVERINGROW.get(i);
+    private void generateSolution(BitSet solution, int[] U) {
+        for (int i = 0; i < var.getROWS(); i++) {
+            List<Integer> ai = var.getColumnsCoveringRow(i);
 
-            int randomRC = randomNumber(RC_SIZE);
+            int randomRC = cUtils.randomNumber(RC_SIZE);
             int j = ai.get(randomRC);
 
             if (!solution.get(j)) {
                 solution.set(j);
-                List<Integer> Bj = ROWSCOVEREDBYCOLUMN.get(j);
+                List<Integer> Bj = var.getRowsCoveredByColumn(j);
                 for (int index : Bj) {
                     U[index]++;
                 }
@@ -42,12 +44,12 @@ public class Solution {
         }
     }
 
-    private static void removeRedundantColumns(BitSet solution, int[] U) {
+    private void removeRedundantColumns(BitSet solution, int[] U) {
         int t = solution.cardinality();
         while (t > 0) {
-            List<Integer> columns = getColumns(solution);
-            int j = columns.get(randomNumber(t));
-            List<Integer> Bj = ROWSCOVEREDBYCOLUMN.get(j);
+            List<Integer> columns = cUtils.getColumns(solution);
+            int j = columns.get(cUtils.randomNumber(t));
+            List<Integer> Bj = var.getRowsCoveredByColumn(j);
 
             boolean flag = true;
             for (int index : Bj) {

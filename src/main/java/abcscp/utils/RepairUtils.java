@@ -1,5 +1,7 @@
 package abcscp.utils;
 
+import abcscp.config.Variables;
+
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Comparator;
@@ -7,24 +9,24 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static abcscp.config.Parameters.RC_SIZE;
-import static abcscp.config.Variables.COLUMNSCOVERINGROW;
-import static abcscp.config.Variables.COSTS;
-import static abcscp.config.Variables.ROWSCOVEREDBYCOLUMN;
-import static abcscp.utils.CommonUtils.getColumns;
-import static abcscp.utils.CommonUtils.randomNumber;
+
 
 public class RepairUtils {
-    private RepairUtils() {
+    private Variables vr;
+    private CommonUtils cUtils;
+    public RepairUtils(Variables v) {
+        this.vr = v;
+        this.cUtils = new CommonUtils(v);
     }
 
-    public static int getColumnMinRatio(List<Integer> uncoveredRows, int rowIndex) {
-        List<Integer> ai = COLUMNSCOVERINGROW.get(rowIndex);
+    public int getColumnMinRatio(List<Integer> uncoveredRows, int rowIndex) {
+        List<Integer> ai = vr.getCOLUMNSCOVERINGROW().get(rowIndex);
         List<Double> ratioList = new ArrayList<>();
 
         for (int columnIndex : ai) {
-            List<Integer> rowsCovered = ROWSCOVEREDBYCOLUMN.get(columnIndex);
+            List<Integer> rowsCovered = vr.getROWSCOVEREDBYCOLUMN().get(columnIndex);
             List<Integer> uncoveredRowsCovered = getUncoveredRowsCoveredByColumn(uncoveredRows, rowsCovered);
-            double ratio = (double) COSTS.get(columnIndex) / uncoveredRowsCovered.size();
+            double ratio = (double) vr.getCOSTS().get(columnIndex) / uncoveredRowsCovered.size();
             ratioList.add(ratio);
         }
 
@@ -40,14 +42,14 @@ public class RepairUtils {
         return selectedColumn;
     }
 
-    public static int getColumnMinRatioStream(List<Integer> uncoveredRows, int rowIndex) {
-        List<Integer> ai = COLUMNSCOVERINGROW.get(rowIndex);
+    public int getColumnMinRatioStream(List<Integer> uncoveredRows, int rowIndex) {
+        List<Integer> ai = vr.getCOLUMNSCOVERINGROW().get(rowIndex);
 
         return ai.stream()
                 .map(columnIndex -> {
-                    List<Integer> rowsCovered = ROWSCOVEREDBYCOLUMN.get(columnIndex);
+                    List<Integer> rowsCovered = vr.getROWSCOVEREDBYCOLUMN().get(columnIndex);
                     List<Integer> uncoveredRowsCovered = getUncoveredRowsCoveredByColumn(uncoveredRows, rowsCovered);
-                    double ratio = (double) COSTS.get(columnIndex) / uncoveredRowsCovered.size();
+                    double ratio = (double) vr.getCOSTS().get(columnIndex) / uncoveredRowsCovered.size();
                     return new Tuple2<>(columnIndex, ratio);
                 })
                 .min(Comparator.comparing(Tuple2::getT2))
@@ -55,35 +57,26 @@ public class RepairUtils {
                 .get();
     }
 
-    public static List<Integer> getUncoveredRowsCoveredByColumn(
+    public List<Integer> getUncoveredRowsCoveredByColumn(
             List<Integer> uncoveredRows, List<Integer> rowsCoveredByColumn) {
         return uncoveredRows.stream()
                 .filter(rowsCoveredByColumn::contains)
                 .collect(Collectors.toList());
-/*
-        List<Integer> uncoveredRowsCovered = new ArrayList<>();
-        for (int rowIndex : uncoveredRows) {
-            if (rowsCoveredByColumn.contains(rowIndex)) {
-                uncoveredRowsCovered.add(rowIndex);
-            }
-        }
-        return uncoveredRowsCovered;
- */
     }
 
-    public static int selectRandomColumnFromRCL(int i) {
-        int random = randomNumber(RC_SIZE);
-        List<Integer> columnsCovering = COLUMNSCOVERINGROW.get(i);
+    public int selectRandomColumnFromRCL(int i) {
+        int random = cUtils.randomNumber(RC_SIZE);
+        List<Integer> columnsCovering = vr.getCOLUMNSCOVERINGROW().get(i);
         return columnsCovering.get(random);
     }
 
-    public static int getColumnMaxRatio(BitSet solution) {
-        List<Integer> columnsCovering = getColumns(solution);
+    public int getColumnMaxRatio(BitSet solution) {
+        List<Integer> columnsCovering = cUtils.getColumns(solution);
         List<Double> ratioList = new ArrayList<>();
 
         for (int columnIndex : columnsCovering) {
-            List<Integer> rowsCovered = ROWSCOVEREDBYCOLUMN.get(columnIndex);
-            double ratio = (double) COSTS.get(columnIndex) / rowsCovered.size();
+            List<Integer> rowsCovered = vr.getROWSCOVEREDBYCOLUMN().get(columnIndex);
+            double ratio = (double) vr.getCOSTS().get(columnIndex) / rowsCovered.size();
             ratioList.add(ratio);
         }
 
@@ -99,12 +92,12 @@ public class RepairUtils {
         return selectedColumn;
     }
 
-    public static int getColumnMaxRatioStream(BitSet solution) {
-        List<Integer> columnsCovering = getColumns(solution);
+    public int getColumnMaxRatioStream(BitSet solution) {
+        List<Integer> columnsCovering = cUtils.getColumns(solution);
         return columnsCovering.stream()
                 .map(columnIndex -> {
-                    List<Integer> rowsCovered = ROWSCOVEREDBYCOLUMN.get(columnIndex);
-                    double ratio = (double) COSTS.get(columnIndex) / rowsCovered.size();
+                    List<Integer> rowsCovered = vr.getROWSCOVEREDBYCOLUMN().get(columnIndex);
+                    double ratio = (double) vr.getCOSTS().get(columnIndex) / rowsCovered.size();
                     return new Tuple2<>(columnIndex, ratio);
                 })
                 .max(Comparator.comparing(Tuple2::getT2))

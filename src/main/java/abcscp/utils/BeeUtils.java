@@ -1,22 +1,26 @@
 package abcscp.utils;
 
+import abcscp.config.Variables;
+
 import java.util.BitSet;
 import java.util.List;
-import java.util.Random;
 
 import static abcscp.config.Parameters.COL_ADD_1;
 import static abcscp.config.Parameters.COL_ADD_2;
 import static abcscp.config.Parameters.COL_DROP_1;
 import static abcscp.config.Parameters.COL_DROP_2;
-import static abcscp.utils.CommonUtils.getColumns;
+
 
 public class BeeUtils {
-    private static Random random = new Random();
+    private final Variables vr;
+    private final CommonUtils cUtils;
 
-    private BeeUtils() {
+    public BeeUtils(Variables v) {
+        this.vr = v;
+        this.cUtils = new CommonUtils(v);
     }
 
-    public static void addColumns(BitSet solution, List<Integer> distinctColumns) {
+    public void addColumns(BitSet solution, List<Integer> distinctColumns) {
         int n = solution.cardinality();
         int dc = distinctColumns.size();
         int colAdd;
@@ -32,7 +36,7 @@ public class BeeUtils {
             }
         }
 
-        random.ints(0, dc)
+        vr.getRANDOM().ints(0, dc)
                 .distinct()
                 .limit(colAdd)
                 .boxed()
@@ -40,22 +44,11 @@ public class BeeUtils {
                     int index = distinctColumns.get(x);
                     solution.set(index);
                 });
-/*
-        while (colAdd > 0) {
-            int randomNumber = randomNumber(dc);
-            int j = distinctColumns.get(randomNumber);
-            if (j != -1) {
-                solution.set(j);
-                distinctColumns.set(randomNumber, -1);
-                colAdd--;
-            }
-        }
- */
     }
 
-    public static void dropColumns(BitSet solution) {
+    public void dropColumns(BitSet solution) {
         int n = solution.cardinality();
-        List<Integer> columns = getColumns(solution);
+        List<Integer> columns = cUtils.getColumns(solution);
         int colDrop;
         if (columns.size() < 5) {
             colDrop = columns.size();
@@ -65,7 +58,7 @@ public class BeeUtils {
             colDrop = COL_DROP_2;
         }
 
-        random.ints(0, n)
+        vr.getRANDOM().ints(0, n)
                 .distinct()
                 .limit(colDrop)
                 .boxed()
@@ -73,16 +66,5 @@ public class BeeUtils {
                     int index = columns.get(x);
                     solution.set(index, false);
                 });
-/*
-        while (colDrop > 0) {
-            int randomNumber = randomNumber(n);
-            int j = columns.get(randomNumber);
-            if (j != -1) {
-                solution.set(j, false);
-                columns.set(randomNumber, -1);
-                colDrop--;
-            }
-        }
-*/
     }
 }

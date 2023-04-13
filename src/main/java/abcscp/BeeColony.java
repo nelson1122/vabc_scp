@@ -1,64 +1,66 @@
 package abcscp;
 
+import abcscp.config.Variables;
+import abcscp.utils.BeeUtils;
+import abcscp.utils.CommonUtils;
+
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
-import java.util.Random;
 import java.util.stream.IntStream;
 
-import static abcscp.Repair.applyRepairSolution;
-import static abcscp.Solution.createSolution;
 import static abcscp.config.Parameters.EMPLOYED_BEES;
 import static abcscp.config.Parameters.FOOD_NUMBER;
 import static abcscp.config.Parameters.LIMIT;
 import static abcscp.config.Parameters.ONLOOKER_BEES;
-import static abcscp.config.Variables.FITNESS;
-import static abcscp.config.Variables.FOODS;
-import static abcscp.config.Variables.GLOBAL_MIN;
-import static abcscp.config.Variables.GLOBAL_PARAMS;
-import static abcscp.config.Variables.PROB;
-import static abcscp.config.Variables.TRIAL;
-import static abcscp.utils.BeeUtils.addColumns;
-import static abcscp.utils.BeeUtils.dropColumns;
-import static abcscp.utils.CommonUtils.calculateFitnessOneStream;
-import static abcscp.utils.CommonUtils.calculateFitnessTwoStream;
-import static abcscp.utils.CommonUtils.distinctColumnsStream;
-import static abcscp.utils.CommonUtils.getColumnsRandomFoodSource;
-import static abcscp.utils.CommonUtils.randomFoodSource;
-import static abcscp.utils.CommonUtils.uncoveredRowsStream;
-
 
 public class BeeColony {
-    public void initial() {
-        FOODS = new ArrayList<>();
-        FITNESS = new ArrayList<>();
-        TRIAL = new int[FOOD_NUMBER];
-        PROB = new ArrayList<>();
+    private Variables vr;
+    private CommonUtils cUtils;
+    private BeeUtils bUtils;
+    private Solution solution;
+    private Repair repair;
 
+    public BeeColony() {
+    }
+
+    public BeeColony(Variables v) {
+        this.vr = v;
+        this.cUtils = new CommonUtils(v);
+        this.bUtils = new BeeUtils(v);
+        this.solution = new Solution(v);
+        this.repair = new Repair(v);
+    }
+
+    public void initial() {
+        vr.setFOODS(new ArrayList<>());
+        vr.setFITNESS(new ArrayList<>());
+        vr.setTRIAL(new int[FOOD_NUMBER]);
+        vr.setPROB(new ArrayList<>());
         for (int i = 0; i < FOOD_NUMBER; i++) {
-            BitSet solution = createSolution();
-            FOODS.add(solution);
-            FITNESS.add(calculateFitnessOneStream(solution));
-            TRIAL[i] = 0;
+            BitSet newFoodSource = solution.createSolution();
+            vr.addFoodSource(newFoodSource);
+            vr.addFitness(cUtils.calculateFitnessOneStream(newFoodSource));
+            vr.setTrial(i, 0);
         }
-        GLOBAL_MIN = FITNESS.get(0);
-        GLOBAL_PARAMS = (BitSet) FOODS.get(0).clone();
+        vr.setGLOBAL_MIN(vr.getFitness(0));
+        vr.setGLOBAL_PARAMS(vr.getFoodSource(0));
     }
 
     public void sendEmployedBees() {
         for (int i = 0; i < EMPLOYED_BEES; i++) {
-            BitSet nfs = (BitSet) FOODS.get(i).clone();
+            BitSet nfs = vr.getFoodSource(i);
 
-            int rIndex = randomFoodSource(i);
-            BitSet rfs = (BitSet) FOODS.get(rIndex).clone();
-            List<Integer> distinctColumns = distinctColumnsStream(nfs, rfs);
+            int rIndex = cUtils.randomFoodSource(i);
+            BitSet rfs = vr.getFoodSource(rIndex);
+            List<Integer> distinctColumns = cUtils.distinctColumnsStream(nfs, rfs);
 
             if (!distinctColumns.isEmpty()) {
-                addColumns(nfs, distinctColumns);
-                dropColumns(nfs);
-                List<Integer> uncoveredRows = uncoveredRowsStream(nfs);
+                bUtils.addColumns(nfs, distinctColumns);
+                bUtils.dropColumns(nfs);
+                List<Integer> uncoveredRows = cUtils.uncoveredRowsStream(nfs);
                 if (!uncoveredRows.isEmpty()) {
-                    applyRepairSolution(nfs, uncoveredRows);
+                    repair.applyRepairSolution(nfs, uncoveredRows);
                 }
                 memorizeSource(nfs, i);
             } else {
@@ -70,18 +72,17 @@ public class BeeColony {
     public void sendOnlookerBees() {
         int i = 0;
         int t = 0;
-//        double r = (Math.random() * 32767 / ((double) (32767) + (double) (1)));
-        double r = new Random().nextDouble() * 100.0 / 100.0;
+        double r = vr.getRANDOM().nextDouble() * 100.0 / 100.0;
         while (t < ONLOOKER_BEES) {
-            if (r < PROB.get(i)) {
+            if (r < vr.getProbability(i)) {
                 t++;
-                BitSet fs = (BitSet) FOODS.get(i).clone();
-                List<Integer> distinctColumns = getColumnsRandomFoodSource(fs, i);
-                addColumns(fs, distinctColumns);
-                dropColumns(fs);
-                List<Integer> uncoveredRows = uncoveredRowsStream(fs);
+                BitSet fs = vr.getFoodSource(i);
+                List<Integer> distinctColumns = cUtils.getColumnsRandomFoodSource(fs, i);
+                bUtils.addColumns(fs, distinctColumns);
+                bUtils.dropColumns(fs);
+                List<Integer> uncoveredRows = cUtils.uncoveredRowsStream(fs);
                 if (!uncoveredRows.isEmpty()) {
-                    applyRepairSolution(fs, uncoveredRows);
+                    repair.applyRepairSolution(fs, uncoveredRows);
                 }
                 memorizeSource(fs, i);
             }
@@ -95,97 +96,88 @@ public class BeeColony {
     public void sendScoutBees() {
         IntStream.range(0, FOOD_NUMBER)
                 .boxed()
-                .filter(fs -> TRIAL[fs] > LIMIT)
-                .forEach(fs -> {
-                    BitSet newFoodSource = createSolution();
-                    int fitness = calculateFitnessOneStream(newFoodSource);
-                    FOODS.set(fs, (BitSet) newFoodSource.clone());
-                    FITNESS.set(fs, fitness);
-                    TRIAL[fs] = 0;
+                .filter(fs -> vr.getTrial(fs) > LIMIT)
+                .forEach(i -> {
+                    BitSet newFoodSource = solution.createSolution();
+                    int fitness = cUtils.calculateFitnessOneStream(newFoodSource);
+                    vr.setFoodSource(i, newFoodSource);
+                    vr.setFitness(i, fitness);
+                    vr.setTrial(i, 0);
                 });
-
-//        for (int i = 0; i < FOOD_NUMBER; i++) {
-//            if (TRIAL[i] > LIMIT) {
-//                BitSet newFoodSource = createSolution();
-//                int fitness = calculateFitnessOneStream(newFoodSource);
-//                FOODS.set(i, (BitSet) newFoodSource.clone());
-//                FITNESS.set(i, fitness);
-//                TRIAL[i] = 0;
-//            }
-//        }
     }
 
 
     private void memorizeSource(BitSet newFoodSource, int i) {
-        int newFitness = calculateFitnessOneStream(newFoodSource);
-        int currFitness = FITNESS.get(i);
+        int newFitness = cUtils.calculateFitnessOneStream(newFoodSource);
+        int currFitness = vr.getFitness(i);
 
         if (currFitness > newFitness) {
-            FOODS.set(i, (BitSet) newFoodSource.clone());
-            FITNESS.set(i, newFitness);
-            TRIAL[i] = 0;
+            vr.setFoodSource(i, newFoodSource);
+            vr.setFitness(i, newFitness);
+            vr.setTrial(i, 0);
         } else if (currFitness == newFitness) {
-            int newFitnessTwo = calculateFitnessTwoStream(newFoodSource);
-            int currFitnessTwo = calculateFitnessTwoStream(FOODS.get(i));
+            int newFitnessTwo = cUtils.calculateFitnessTwoStream(newFoodSource);
+            int currFitnessTwo = cUtils.calculateFitnessTwoStream(vr.getFoodSource(i));
 
             if (currFitnessTwo > newFitnessTwo) {
-                FOODS.set(i, (BitSet) newFoodSource.clone());
+                vr.setFoodSource(i, newFoodSource);
 //                TRIAL[i] = 0;
             } else {
 //                TRIAL[i]++;
             }
         } else {
-            TRIAL[i]++;
+            vr.incrementTrial(i);
         }
     }
 
     public void memorizeBestSource() {
         for (int i = 0; i < FOOD_NUMBER; i++) {
-            int fitness = FITNESS.get(i);
-            if (GLOBAL_MIN.equals(fitness)) {
-                int f = calculateFitnessTwoStream(FOODS.get(i));
-                int fGlobal = calculateFitnessTwoStream(GLOBAL_PARAMS);
+            int fitness = vr.getFitness(i);
+            if (vr.getGLOBAL_MIN() == fitness) {
+                BitSet currentFS = vr.getFoodSource(i);
+                BitSet currentBestFS = vr.getGLOBAL_PARAMS();
+                int f = cUtils.calculateFitnessTwoStream(currentFS);
+                int fGlobal = cUtils.calculateFitnessTwoStream(currentBestFS);
                 if (fGlobal > f) {
-                    GLOBAL_PARAMS = (BitSet) FOODS.get(i).clone();
+                    vr.setGLOBAL_PARAMS(vr.getFoodSource(i));
                 }
-            } else if (GLOBAL_MIN > fitness) {
-                GLOBAL_MIN = fitness;
-                GLOBAL_PARAMS = (BitSet) FOODS.get(i).clone();
+            } else if (vr.getGLOBAL_MIN() > fitness) {
+                vr.setGLOBAL_MIN(fitness);
+                vr.setGLOBAL_PARAMS(vr.getFoodSource(i));
             }
         }
     }
 
     private void generateScoutBee(int i) {
-        BitSet solution = createSolution();
-        FOODS.set(i, (BitSet) solution.clone());
-        FITNESS.set(i, calculateFitnessOneStream(solution));
-        TRIAL[i] = 0;
+        BitSet newFoodSource = solution.createSolution();
+        vr.setFoodSource(i, newFoodSource);
+        vr.setFitness(i, cUtils.calculateFitnessOneStream(newFoodSource));
+        vr.setTrial(i, 0);
     }
 
 
     public void calculateProbabilitiesOne() {
         double sumFitness = 0d;
         for (int i = 0; i < FOOD_NUMBER; i++) {
-            sumFitness += FITNESS.get(i);
+            sumFitness += vr.getFitness(i);
         }
-
         for (int i = 0; i < FOOD_NUMBER; i++) {
-            double probability = FITNESS.get(i) / sumFitness;
-            PROB.add(probability);
+            double result = vr.getFitness(i) / sumFitness;
+            vr.addProbability(result);
         }
 
     }
 
     public void calculateProbabilitiesTwo() {
-        double maxfit = FITNESS.get(0);
+        double maxfit = vr.getFitness(0);
         for (int i = 0; i < FOOD_NUMBER; i++) {
-            if (FITNESS.get(i) > maxfit) {
-                maxfit = FITNESS.get(i);
+            if (vr.getFitness(i) > maxfit) {
+                maxfit = vr.getFitness(i);
             }
         }
         for (int i = 0; i < FOOD_NUMBER; i++) {
-            double result = (0.9 * (FITNESS.get(i) / maxfit)) + 0.1;
-            PROB.add(result);
+            double result = (0.9 * (vr.getFitness(i) / maxfit)) + 0.1;
+            vr.addProbability(result);
         }
     }
 }

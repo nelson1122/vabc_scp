@@ -1,5 +1,7 @@
 package abcscp;
 
+import abcscp.config.Variables;
+
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -8,14 +10,16 @@ import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
 import java.util.logging.Logger;
-
-import static abcscp.config.Variables.COLUMNS;
-import static abcscp.config.Variables.COLUMNSCOVERINGROW;
-import static abcscp.config.Variables.COSTS;
-import static abcscp.config.Variables.ROWS;
-import static abcscp.config.Variables.ROWSCOVEREDBYCOLUMN;
-
 public class Problem {
+
+    private Variables var;
+
+    public Problem() {
+    }
+
+    public Problem(Variables v){
+        this.var = v;
+    }
 
     static final Logger LOGGER = Logger.getLogger(Problem.class.getName());
 
@@ -25,36 +29,36 @@ public class Problem {
 
         File file = new File(filePath);
         Scanner scanner = new Scanner(file);
-        ROWS = scanner.nextInt();
-        COLUMNS = scanner.nextInt();
+        var.setROWS(scanner.nextInt());
+        var.setCOLUMNS(scanner.nextInt());
 
-        COSTS = new ArrayList<>();
-        COLUMNSCOVERINGROW = new ArrayList<>();
-        ROWSCOVEREDBYCOLUMN = new ArrayList<>();
+        var.setCOSTS(new ArrayList<>());
+        var.setCOLUMNSCOVERINGROW(new ArrayList<>());
+        var.setROWSCOVEREDBYCOLUMN(new ArrayList<>());
 
-        for (int j = 0; j < COLUMNS; j++) {
-            COSTS.add(scanner.nextInt());
+        for (int j = 0; j < var.getCOLUMNS(); j++) {
+            var.addCosts(scanner.nextInt());
         }
 
-        for (int i = 0; i < ROWS; i++) {
+        for (int i = 0; i < var.getROWS(); i++) {
             int numCol = scanner.nextInt();
             List<Integer> columns = new ArrayList<>();
             for (int j = 0; j < numCol; j++) {
                 int column = scanner.nextInt() - 1;
                 columns.add(column);
             }
-            COLUMNSCOVERINGROW.add(columns);
+            var.addColumnsCoveringRow(columns);
         }
 
-        for (int j = 0; j < COLUMNS; j++) {
+        for (int j = 0; j < var.getCOLUMNS(); j++) {
             List<Integer> rows = new ArrayList<>();
-            for (int i = 0; i < ROWS; i++) {
-                List<Integer> columns = COLUMNSCOVERINGROW.get(i);
+            for (int i = 0; i < var.getROWS(); i++) {
+                List<Integer> columns = var.getColumnsCoveringRow(i);
                 if (columns.contains(j)) {
                     rows.add(i);
                 }
             }
-            ROWSCOVEREDBYCOLUMN.add(rows);
+            var.addRowsCoveredByColumn(rows);
         }
 
         scanner.close();
