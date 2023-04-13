@@ -16,8 +16,8 @@ import static abcscp.config.Parameters.FOOD_NUMBER;
 public class CommonUtils {
     private Variables vr;
 
-    public CommonUtils(Variables var) {
-        this.vr = var;
+    public CommonUtils(Variables v) {
+        this.vr = v;
     }
 
     public int randomNumber(int high) {
