@@ -1,5 +1,6 @@
 package abcscp.utils;
 
+import abcscp.Problem;
 import abcscp.config.Variables;
 import lombok.Builder;
 
@@ -10,6 +11,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static abcscp.Problem.COLUMNS;
+import static abcscp.Problem.ROWS;
+import static abcscp.Problem.getColumnsCoveringRow;
+import static abcscp.Problem.getCost;
+import static abcscp.Problem.getRowsCoveredByColumn;
 import static abcscp.config.Parameters.FOOD_NUMBER;
 
 @Builder
@@ -28,15 +34,16 @@ public class CommonUtils {
     public int calculateFitnessOneStream(BitSet xj) {
         return xj.stream()
                 .boxed()
-                .map(x -> vr.getCOSTS().get(x))
-                .reduce(Integer::sum).get();
+                .map(Problem::getCost)
+                .reduce(Integer::sum)
+                .get();
     }
 
     public int calculateFitnessOne(BitSet xj) {
         int fitness = 0;
-        for (int j = 0; j < vr.getCOLUMNS(); j++) {
+        for (int j = 0; j < COLUMNS; j++) {
             if (xj.get(j)) {
-                fitness += vr.getCOSTS().get(j);
+                fitness += getCost(j);
             }
         }
         return fitness;
@@ -45,16 +52,16 @@ public class CommonUtils {
     public int calculateFitnessTwoStream(BitSet xj) {
         return xj.stream()
                 .boxed()
-                .map(vr.getROWSCOVEREDBYCOLUMN()::get)
+                .map(Problem::getRowsCoveredByColumn)
                 .map(List::size).reduce(Integer::sum)
                 .get();
     }
 
     public int calculateFitnessTwo(BitSet xj) {
         int count = 0;
-        for (int j = 0; j < vr.getCOLUMNS(); j++)
+        for (int j = 0; j < COLUMNS; j++)
             if (xj.get(j)) {
-                count += vr.getROWSCOVEREDBYCOLUMN().get(j).size();
+                count += getRowsCoveredByColumn(j).size();
             }
         return count;
     }
@@ -80,7 +87,7 @@ public class CommonUtils {
 
     public List<Integer> distinctColumns(BitSet i, BitSet j) {
         List<Integer> distinctColumns = new ArrayList<>();
-        for (int x = 0; x < vr.getCOLUMNS(); x++) {
+        for (int x = 0; x < COLUMNS; x++) {
             if (!i.get(x) && j.get(x)) {
                 distinctColumns.add(x);
             }
@@ -89,17 +96,17 @@ public class CommonUtils {
     }
 
     public List<Integer> uncoveredRows(BitSet solution) {
-        int[] w = new int[vr.getROWS()];
+        int[] w = new int[ROWS];
         List<Integer> uncoveredRows = new ArrayList<>();
-        for (int i = 0; i < vr.getROWS(); i++) {
-            List<Integer> ai = vr.getCOLUMNSCOVERINGROW().get(i);
-            for (int j = 0; j < vr.getCOLUMNS(); j++) {
+        for (int i = 0; i < ROWS; i++) {
+            List<Integer> ai = getColumnsCoveringRow(i);
+            for (int j = 0; j < COLUMNS; j++) {
                 if (solution.get(j) && ai.contains(j)) {
                     w[i]++;
                 }
             }
         }
-        for (int i = 0; i < vr.getROWS(); i++) {
+        for (int i = 0; i < ROWS; i++) {
             if (w[i] == 0) {
                 uncoveredRows.add(i);
             }
@@ -111,12 +118,12 @@ public class CommonUtils {
         List<Integer> coveredRows =
                 solution.stream()
                         .boxed()
-                        .map(vr.getROWSCOVEREDBYCOLUMN()::get)
+                        .map(Problem::getRowsCoveredByColumn)
                         .flatMap(Collection::stream)
                         .distinct()
                         .collect(Collectors.toList());
         return IntStream
-                .range(0, vr.getROWS())
+                .range(0, ROWS)
                 .boxed()
                 .filter(x -> !coveredRows.contains(x))
                 .collect(Collectors.toList());

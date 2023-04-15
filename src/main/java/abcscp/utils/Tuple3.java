@@ -9,7 +9,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class Tuple2<K, V> {
+public class Tuple3<K, V1, V2> {
     private K t1;
-    private V t2;
+    private V1 t2;
+    private V2 t3;
 }

@@ -12,21 +12,14 @@ import java.util.Random;
 @Setter
 public class Variables {
     //Variables
-    private int ROWS;
-    private int COLUMNS;
-    private List<Integer> COSTS;
-    private List<List<Integer>> COLUMNSCOVERINGROW;
-    private List<List<Integer>> ROWSCOVEREDBYCOLUMN;
     private List<BitSet> FOODS;
     private BitSet GLOBAL_PARAMS;
     private List<Integer> FITNESS;
     private int[] TRIAL;
     private List<Double> PROB;
     private Integer GLOBAL_MIN;
-
     private List<Integer> GLOBAL_MINS;
     private Double MEAN;
-
     private Random RANDOM;
 
     public Variables() {
@@ -80,31 +73,10 @@ public class Variables {
         this.PROB.add(value);
     }
 
-    public void addCosts(int value) {
-        this.COSTS.add(value);
-    }
-
-    public void addColumnsCoveringRow(List<Integer> columns) {
-        this.COLUMNSCOVERINGROW.add(columns);
-    }
-
-    public List<Integer> getColumnsCoveringRow(int i) {
-        return this.COLUMNSCOVERINGROW.get(i);
-    }
-
-    public void addRowsCoveredByColumn(List<Integer> rows) {
-        this.ROWSCOVEREDBYCOLUMN.add(rows);
-    }
-
-    public void addGlobalMin(Integer value) {
-        this.GLOBAL_MINS.add(value);
-    }
-
-    public List<Integer> getRowsCoveredByColumn(int j) {
-        return this.ROWSCOVEREDBYCOLUMN.get(j);
-    }
-
     public boolean getGlobalParamsColumnValue(int j){
         return this.GLOBAL_PARAMS.get(j);
+    }
+    public void addGlobalMin(Integer value) {
+        this.GLOBAL_MINS.add(value);
     }
 }
