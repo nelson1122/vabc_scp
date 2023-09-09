@@ -16,12 +16,11 @@ public class AbcVars {
     private List<Integer> GLOBAL_MINS;
     private Double MEAN;
     private Random RANDOM;
-    private long SEED = 1693695630833L;
+    private long SEED;
 
-    public AbcVars() {
-        // long seed = System.currentTimeMillis();
-        System.out.println("\n  seed  configured -> " + SEED + "\n");
-        this.RANDOM = new Random(SEED);
+    public AbcVars(long seed) {
+        this.SEED = seed;
+        this.RANDOM = new Random(seed);
         this.GLOBAL_MINS = new ArrayList<>();
         this.MEAN = 0d;
     }
@@ -96,6 +95,14 @@ public class AbcVars {
 
     public void setRANDOM(Random RANDOM) {
         this.RANDOM = RANDOM;
+    }
+
+    public long getSEED() {
+        return SEED;
+    }
+
+    public void setSEED(long SEED) {
+        this.SEED = SEED;
     }
 
     // Custom Methods

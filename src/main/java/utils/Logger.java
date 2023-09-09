@@ -15,11 +15,13 @@ public class Logger {
     public SimpleDateFormat FORMAT;
     private int[] RUNS;
     private int[] GLOBALMINS;
+    private int[] SEEDS;
 
     public Logger() {
-        FORMAT = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
+        FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
         RUNS = new int[RUNTIME];
         GLOBALMINS = new int[RUNTIME];
+        SEEDS = new int[RUNTIME];
     }
 
     public void addProgress(int run) {
@@ -28,6 +30,10 @@ public class Logger {
 
     public void setGlobalMin(int run, int value) {
         this.GLOBALMINS[run] = value;
+    }
+
+    public void setSEED(int run, int value) {
+        this.SEEDS[run] = value;
     }
 
     public void log(Tuple3<Integer, Integer, BitSet> result) {
@@ -81,7 +87,11 @@ public class Logger {
                 progress = progress.concat("·");
             }
             double progDecimal = ((double) RUNS[x] / MAX_CYCLE) * 100.0;
-            progress = "[ run " + x + " | iter: " + RUNS[x] + " | Best: " + GLOBALMINS[x] + " ] ==> " +
+            progress = FORMAT.format(new Date()) + " [ " +
+                    "run " + x + " | " +
+                    "seed: " + SEEDS[x] + " | " +
+                    "iter: " + RUNS[x] + " | " +
+                    "Best: " + GLOBALMINS[x] + " ] ==> " +
                     progress.concat(" " + Math.round(progDecimal * 100) / 100.0 + "%\n");
             logs.add(progress);
         }
@@ -94,7 +104,7 @@ public class Logger {
             progress = progress.concat("·");
         }
         double progDecimal = ((double) RUNS[x] / MAX_CYCLE) * 100.0;
-        progress = "[ run " + x + " | iter: " + RUNS[x] + " | Best: " + GLOBALMINS[x] + " ] ==> " +
+        progress = FORMAT.format(new Date()) + " [ run " + x + " | iter: " + RUNS[x] + " | Best: " + GLOBALMINS[x] + " ] ==> " +
                 progress.concat(" " + Math.round(progDecimal * 100) / 100.0 + "%");
         System.out.println(progress);
     }

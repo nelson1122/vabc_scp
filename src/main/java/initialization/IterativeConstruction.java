@@ -73,10 +73,6 @@ public class IterativeConstruction {
             xj.set(j);
 //            }
             updateMap(mapList, j);
-
-            if(mapList.size() == 10){
-                System.out.println();
-            }
         }
         return xj;
     }

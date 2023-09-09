@@ -84,6 +84,13 @@ public class CommonUtils {
                 .collect(Collectors.toList());
     }
 
+    public List<Integer> distinctColumnsBitSet(BitSet xj1, BitSet xj2){
+        xj1 = (BitSet) xj1.clone();
+        xj2 = (BitSet) xj2.clone();
+        xj2.andNot(xj1);
+        return xj2.stream().boxed().collect(Collectors.toList());
+    }
+
     public List<Integer> distinctColumns(BitSet i, BitSet j) {
         List<Integer> distinctColumns = new ArrayList<>();
         for (int x = 0; x < COLUMNS; x++) {
@@ -126,6 +133,11 @@ public class CommonUtils {
                 .boxed()
                 .filter(x -> !coveredRows.contains(x))
                 .collect(Collectors.toList());
+    }
+
+    public void updateUncoveredRows(List<Integer> uncoveredRows, int j){
+        List<Integer> Bj = getRowsCoveredByColumn(j);
+        uncoveredRows.removeAll(Bj);
     }
 
     public List<Integer> getColumns(BitSet solution) {

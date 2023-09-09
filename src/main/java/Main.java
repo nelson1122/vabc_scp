@@ -23,23 +23,25 @@ public class Main {
 //            "scpnrg4.txt",
 //            "scpnrh2.txt"
     };
+    static int seed = 90;
     static Logger logger = new Logger();
 
     public static void main(String[] args) {
         logger.log("Variant of the Artificial Bee Colony Algorithm ABC_SCP to solve the Set Covering Problem");
         logger.log("University of Cauca, 2023");
 
-        runABCSCPMonoThread();
-        //runABCSCPMultiThread();
+        // runABCSCPMonoThread();
+        runABCSCPMultiThread();
 
         logger.log("Algorithm has finished!");
     }
 
     public static void runABCSCPMultiThread() {
         for (String fileName : fileNames) {
+            seed = 90;
             try {
-                Problem.read("src/main/resources/" + fileName);
-                // Problem.read("main/resources/" + fileName);
+                // Problem.read("src/main/resources/" + fileName);
+                Problem.read("main/resources/" + fileName);
                 logger.log("Problem processing [" + fileName + "] has started!");
                 logger.log();
 
@@ -48,8 +50,9 @@ public class Main {
                         IntStream.range(0, RUNTIME)
                                 .sorted()
                                 .mapToObj(rIndex -> forkJoinPool.submit(() -> {
-
-                                    AbcVars vr = new AbcVars();
+                                    seed = seed + 10;
+                                    logger.setSEED(rIndex, seed);
+                                    AbcVars vr = new AbcVars(seed);
                                     BeeColony bee = new BeeColony(vr);
                                     bee.initial();
                                     bee.memorizeBestSource();
@@ -87,7 +90,7 @@ public class Main {
     public static void runABCSCPMonoThread() {
         try {
             Problem.read("src/main/resources/scp41.txt");
-            AbcVars vr = new AbcVars();
+            AbcVars vr = new AbcVars(seed);
             BeeColony bee = new BeeColony(vr);
             bee.initial();
             bee.memorizeBestSource();

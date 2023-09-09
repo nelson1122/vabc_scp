@@ -47,11 +47,11 @@ public class RepairUtils {
     public int getColumnMinRatioStream(List<Integer> uncoveredRows, int rowIndex) {
         List<Integer> ai = getColumnsCoveringRow(rowIndex);
         return ai.stream()
-                .map(columnIndex -> {
-                    List<Integer> rowsCovered = getRowsCoveredByColumn(columnIndex);
+                .map(j -> {
+                    List<Integer> rowsCovered = getRowsCoveredByColumn(j);
                     List<Integer> uncoveredRowsCovered = getUncoveredRowsCoveredByColumn(uncoveredRows, rowsCovered);
-                    double ratio = (double) getCost(columnIndex) / uncoveredRowsCovered.size();
-                    return new Tuple2<>(columnIndex, ratio);
+                    double ratio = getCost(j) * 1.0 / uncoveredRowsCovered.size();
+                    return new Tuple2<>(j, ratio);
                 })
                 .min(Comparator.comparing(Tuple2::getT2))
                 .map(Tuple2::getT1)

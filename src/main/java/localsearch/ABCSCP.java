@@ -1,7 +1,10 @@
 package main.java.localsearch;
 
+import main.java.variables.ScpVars;
+
 import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.Collection;
 import java.util.List;
 
 import static main.java.variables.ScpVars.COLUMNS;
@@ -12,19 +15,16 @@ import static main.java.variables.ScpVars.getRowsCoveredByColumn;
 
 public class ABCSCP {
 
-    public BitSet applyLocalSearch(BitSet solution) {
+    public BitSet applyLocalSearch(BitSet xj) {
         int[] u = new int[ROWS];
 
 
         // 1- Computing for each row i the number of columns ui in the current solution covering it.
-        for (int i = 0; i < ROWS; i++) {
-            List<Integer> ai = getColumnsCoveringRow(i);
-            for (int j = 0; j < COLUMNS; j++) {
-                if (solution.get(j) && ai.contains(j)) {
-                    u[i]++;
-                }
-            }
-        }
+        xj.stream()
+                .boxed()
+                .map(ScpVars::getRowsCoveredByColumn)
+                .flatMap(Collection::stream)
+                .forEach(i -> u[i]++);
 /*
         List<List<Integer>> Pj = new ArrayList<>();
         for (int j = 0; j < COLUMNS; j++) {
@@ -42,7 +42,7 @@ public class ABCSCP {
         }
 */
 
-        solution.stream()
+        xj.stream()
                 .boxed()
                 .forEach(j -> {
                     List<Integer> rowsCoveredByOneColumn = new ArrayList<>();
@@ -54,15 +54,15 @@ public class ABCSCP {
                     }
                     int Pj = rowsCoveredByOneColumn.size();
                     if (Pj == 0) {
-                        solution.clear(j);
+                        xj.clear(j);
                         updateUi(u, j, false);
                     }
                     if (Pj == 1) {
                         int row = rowsCoveredByOneColumn.get(0);
                         int minCostColumn = findMinCostColumn(row); // Implement this function
                         if (minCostColumn != j) {
-                            solution.clear(j);
-                            solution.set(minCostColumn);
+                            xj.clear(j);
+                            xj.set(minCostColumn);
                             updateUi(u, j, false);
                             updateUi(u, minCostColumn, true);
                         }
@@ -77,15 +77,15 @@ public class ABCSCP {
                         int sumCosts = calculateColumnCost(minCostColumn1) + calculateColumnCost(minCostColumn2);
 
                         if (minCostColumn1 != minCostColumn2 && sumCosts <= calculateColumnCost(j)) {
-                            solution.clear(j);
-                            solution.set(minCostColumn1);
-                            solution.set(minCostColumn2);
+                            xj.clear(j);
+                            xj.set(minCostColumn1);
+                            xj.set(minCostColumn2);
                             updateUi(u, j, false);
                             updateUi(u, minCostColumn1, true);
                             updateUi(u, minCostColumn2, true);
                         } else if (minCostColumn1 == minCostColumn2 && minCostColumn1 != j) {
-                            solution.clear(j);
-                            solution.set(minCostColumn1);
+                            xj.clear(j);
+                            xj.set(minCostColumn1);
                             updateUi(u, j, false);
                             updateUi(u, minCostColumn1, true);
                         }
@@ -102,37 +102,37 @@ public class ABCSCP {
                         int sumCosts = calculateColumnCost(minCostColumn1) + calculateColumnCost(minCostColumn2) + calculateColumnCost(minCostColumn3);
 
                         if (minCostColumn1 != minCostColumn2 && minCostColumn1 != minCostColumn3 && minCostColumn2 != minCostColumn3 && sumCosts <= calculateColumnCost(j)) {
-                            solution.clear(j);
-                            solution.set(minCostColumn1);
-                            solution.set(minCostColumn2);
-                            solution.set(minCostColumn3);
+                            xj.clear(j);
+                            xj.set(minCostColumn1);
+                            xj.set(minCostColumn2);
+                            xj.set(minCostColumn3);
                             updateUi(u, j, false);
                             updateUi(u, minCostColumn1, true);
                             updateUi(u, minCostColumn2, true);
                             updateUi(u, minCostColumn3, true);
                         } else if (minCostColumn1 == minCostColumn2 && minCostColumn2 == minCostColumn3 && minCostColumn1 != j) {
-                            solution.clear(j);
-                            solution.set(minCostColumn1);
+                            xj.clear(j);
+                            xj.set(minCostColumn1);
                             updateUi(u, j, false);
                             updateUi(u, minCostColumn1, true);
                         } else if (minCostColumn1 == minCostColumn2 && minCostColumn1 != minCostColumn3 && sumCosts <= calculateColumnCost(j)) {
-                            solution.clear(j);
-                            solution.set(minCostColumn1);
-                            solution.set(minCostColumn3);
+                            xj.clear(j);
+                            xj.set(minCostColumn1);
+                            xj.set(minCostColumn3);
                             updateUi(u, j, false);
                             updateUi(u, minCostColumn1, true);
                             updateUi(u, minCostColumn3, true);
                         } else if (minCostColumn1 == minCostColumn3 && minCostColumn1 != minCostColumn2 && sumCosts <= calculateColumnCost(j)) {
-                            solution.clear(j);
-                            solution.set(minCostColumn1);
-                            solution.set(minCostColumn2);
+                            xj.clear(j);
+                            xj.set(minCostColumn1);
+                            xj.set(minCostColumn2);
                             updateUi(u, j, false);
                             updateUi(u, minCostColumn1, true);
                             updateUi(u, minCostColumn2, true);
                         } else if (minCostColumn2 == minCostColumn3 && minCostColumn2 != minCostColumn1 && sumCosts <= calculateColumnCost(j)) {
-                            solution.clear(j);
-                            solution.set(minCostColumn2);
-                            solution.set(minCostColumn1);
+                            xj.clear(j);
+                            xj.set(minCostColumn2);
+                            xj.set(minCostColumn1);
                             updateUi(u, j, false);
                             updateUi(u, minCostColumn2, true);
                             updateUi(u, minCostColumn1, true);
@@ -140,7 +140,7 @@ public class ABCSCP {
                     }
                 });
 
-        return solution;
+        return xj;
     }
 
 
