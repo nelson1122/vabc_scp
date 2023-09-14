@@ -24,6 +24,7 @@ public class BeeUtils {
         int n = xj.cardinality();
         int dc = distinctColumns.size();
         int colAdd;
+
         if (n > 35) {
             colAdd = COL_ADD_1;
             if (dc < COL_ADD_1) {
@@ -46,10 +47,11 @@ public class BeeUtils {
                 });
     }
 
-    public void dropColumns(BitSet solution) {
-        int n = solution.cardinality();
-        List<Integer> columns = cUtils.getColumns(solution);
+    public void dropColumns(BitSet xj) {
+        int n = xj.cardinality();
+        List<Integer> columns = cUtils.getColumns(xj);
         int colDrop;
+
         if (n < 5) {
             colDrop = n;
         } else if (n > 35) {
@@ -64,7 +66,7 @@ public class BeeUtils {
                 .boxed()
                 .forEach(x -> {
                     int index = columns.get(x);
-                    solution.clear(index);
+                    xj.clear(index);
                 });
     }
 }

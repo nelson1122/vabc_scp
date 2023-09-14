@@ -120,9 +120,9 @@ public class CommonUtils {
         return uncoveredRows;
     }
 
-    public List<Integer> uncoveredRowsStream(BitSet solution) {
+    public List<Integer> uncoveredRowsStream(BitSet xj) {
         List<Integer> coveredRows =
-                solution.stream()
+                xj.stream()
                         .boxed()
                         .map(ScpVars::getRowsCoveredByColumn)
                         .flatMap(Collection::stream)
@@ -148,7 +148,7 @@ public class CommonUtils {
 
     public List<Integer> getColumnsRandomFoodSource(BitSet solution, int i) {
         int randomFoodS = randomFoodSource(i);
-        List<Integer> distinctColumns = distinctColumnsStream(solution, vr.getFOODS().get(randomFoodS));
+        List<Integer> distinctColumns = distinctColumnsBitSet(solution, vr.getFOODS().get(randomFoodS));
         if (!distinctColumns.isEmpty()) {
             return distinctColumns;
         }

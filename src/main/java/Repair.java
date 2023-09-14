@@ -9,6 +9,7 @@ import java.util.BitSet;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 import static main.java.config.Parameters.Pa;
 import static main.java.variables.ScpVars.getCost;
@@ -26,26 +27,25 @@ public class Repair {
         this.rUtils = new RepairUtils(v);
     }
 
-    public void applyRepairSolution(BitSet solution, List<Integer> uncoveredRows) {
-        makeSolutionFeasible(solution, uncoveredRows);
-        removeRedundantColumnsRecursive(solution);
+    public void applyRepairSolution(BitSet xj, List<Integer> uncoveredRows) {
+        makeSolutionFeasible(xj, uncoveredRows);
+        removeRedundantColumnsRecursive(xj);
     }
 
-    private void makeSolutionFeasible(BitSet solution, List<Integer> uncoveredRows) {
+    private void makeSolutionFeasible(BitSet xj, List<Integer> uncoveredRows) {
         while (!uncoveredRows.isEmpty()) {
-            int randRow = cUtils.randomNumber(uncoveredRows.size());
-            int indexRowUncovered = uncoveredRows.get(randRow);
+            int indexRowUncovered = uncoveredRows.get(0);
             int indexColumn;
 
             double r = (vr.getRANDOM().nextDouble() * 100.0) / 100.0;
-            double rNum = Math.round(r * 10) / 10.0;
+            double rNum = Math.round(r * 1000) / 1000.0;
 
             if (rNum <= Pa) {
                 indexColumn = rUtils.getColumnMinRatioStream(uncoveredRows, indexRowUncovered);
             } else {
                 indexColumn = rUtils.selectRandomColumnFromRCL(indexRowUncovered);
             }
-            solution.set(indexColumn);
+            xj.set(indexColumn);
             // uncoveredRows = cUtils.uncoveredRowsStream(solution);
             cUtils.updateUncoveredRows(uncoveredRows, indexColumn);
         }

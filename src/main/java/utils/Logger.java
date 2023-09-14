@@ -108,4 +108,20 @@ public class Logger {
                 progress.concat(" " + Math.round(progDecimal * 100) / 100.0 + "%");
         System.out.println(progress);
     }
+
+    public void printLog2(int x) {
+        String progress = "";
+        for (int y = 0; y < RUNS[x] / 10; y++) {
+            progress = progress.concat("·");
+        }
+        double progDecimal = ((double) RUNS[x] / MAX_CYCLE) * 100.0;
+        progress = FORMAT.format(new Date()) + " [ " +
+                "run " + x + " | " +
+                "seed: " + SEEDS[x] + " | " +
+                "iter: " + RUNS[x] + " | " +
+                "Best: " + GLOBALMINS[x] + " ] ==> " +
+                progress.concat(" " + Math.round(progDecimal * 100) / 100.0 + "%");
+        System.out.print(String.format("\033[%dA" , 0));
+        System.out.println(progress);
+    }
 }

@@ -63,21 +63,22 @@ public class BeeColony {
         IntStream.range(0, EMPLOYED_BEES)
                 .boxed()
                 .forEach(i -> {
-                    BitSet nfs = vr.getFoodSource(i);
+                    BitSet fs = vr.getFoodSource(i);
 
                     int rIndex = cUtils.randomFoodSource(i);
                     BitSet rfs = vr.getFoodSource(rIndex);
-                    List<Integer> distinctColumns = cUtils.distinctColumnsBitSet(nfs, rfs);
+                    List<Integer> distinctColumns = cUtils.distinctColumnsBitSet(fs, rfs);
 
                     if (!distinctColumns.isEmpty()) {
-                        bUtils.addColumns(nfs, distinctColumns);
-                        bUtils.dropColumns(nfs);
-                        List<Integer> uncoveredRows = cUtils.uncoveredRowsStream(nfs);
+                        bUtils.addColumns(fs, distinctColumns);
+                        bUtils.dropColumns(fs);
+                        List<Integer> uncoveredRows = cUtils.uncoveredRowsStream(fs);
                         if (!uncoveredRows.isEmpty()) {
-                            repair.applyRepairSolution(nfs, uncoveredRows);
+                            repair.applyRepairSolution(fs, uncoveredRows);
                         }
-                        nfs = localSearch.apply(nfs);
-                        memorizeSource(nfs, i);
+                        fs = localSearch.apply(fs);
+                        memorizeSource(fs, i);
+
                     } else {
                         generateScoutBee(i);
                     }
@@ -199,7 +200,7 @@ public class BeeColony {
 
             if (currFitnessTwo > newFitnessTwo) {
                 vr.setFoodSource(i, newFoodSource);
-//                vr.setTrial(i, 0);
+                vr.setTrial(i, 0);
 //                TRIAL[i] = 0;
             } else {
 //                vr.incrementTrial(i);
