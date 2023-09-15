@@ -70,7 +70,7 @@ public class ABCSCP {
                 .boxed()
                 .sorted(Comparator.reverseOrder())
                 .forEach(t -> {
-                    List<Integer> columns = cUtils.getColumns(xj);
+                    List<Integer> columns = cUtils.getBitsetIndexes(xj);
                     int j = columns.get(cUtils.randomNumber(t));
                     List<Integer> Bj = getRowsCoveredByColumn(j);
 

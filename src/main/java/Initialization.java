@@ -22,8 +22,8 @@ public class Initialization {
     }
 
     public BitSet createSolution() {
-        // return this.abcscp.createSolution();
-        return this.randomMethod.createSolution();
+        return this.abcscp.createSolution();
+        // return this.randomMethod.createSolution();
         // return this.randomHeuristic.createSolution();
         // return this.iConstruction.createSolution();
     }

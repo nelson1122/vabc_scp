@@ -16,6 +16,7 @@ import static main.java.variables.ScpVars.ROWS;
 import static main.java.variables.ScpVars.getColumnsCoveringRow;
 import static main.java.variables.ScpVars.getCost;
 import static main.java.variables.ScpVars.getRowsCoveredByColumn;
+import static main.java.variables.ScpVars.getRowsCoveredByColumnBitset;
 
 
 public class CommonUtils {
@@ -84,7 +85,7 @@ public class CommonUtils {
                 .collect(Collectors.toList());
     }
 
-    public List<Integer> distinctColumnsBitSet(BitSet xj1, BitSet xj2){
+    public List<Integer> distinctColumnsBitSet(BitSet xj1, BitSet xj2) {
         xj1 = (BitSet) xj1.clone();
         xj2 = (BitSet) xj2.clone();
         xj2.andNot(xj1);
@@ -135,12 +136,28 @@ public class CommonUtils {
                 .collect(Collectors.toList());
     }
 
-    public void updateUncoveredRows(List<Integer> uncoveredRows, int j){
-        List<Integer> Bj = getRowsCoveredByColumn(j);
-        uncoveredRows.removeAll(Bj);
+    public BitSet uncoveredRowsBitset(BitSet xj) {
+        BitSet coveredRows = xj.stream()
+                .boxed()
+                .map(ScpVars::getRowsCoveredByColumn)
+                .flatMap(Collection::stream)
+                .distinct()
+                .collect(BitSet::new, BitSet::set, BitSet::or);
+        BitSet rows = IntStream.range(0, ROWS)
+                .boxed()
+                .collect(BitSet::new, BitSet::set, BitSet::or);
+        rows.andNot(coveredRows);
+        return rows;
     }
 
-    public List<Integer> getColumns(BitSet solution) {
+    public List<Integer> uncoveredRowsBitSet(List<Integer> uRows, int j) {
+        BitSet Bj = getRowsCoveredByColumnBitset(j);
+        BitSet unCoveredRows = uRows.stream().collect(BitSet::new, BitSet::set, BitSet::or);
+        unCoveredRows.andNot(Bj);
+        return unCoveredRows.stream().boxed().collect(Collectors.toList());
+    }
+
+    public List<Integer> getBitsetIndexes(BitSet solution) {
         return solution.stream()
                 .boxed()
                 .collect(Collectors.toList());

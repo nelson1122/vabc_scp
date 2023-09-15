@@ -12,6 +12,7 @@ import static main.java.config.Parameters.RC_SIZE;
 import static main.java.variables.ScpVars.getColumnsCoveringRow;
 import static main.java.variables.ScpVars.getCost;
 import static main.java.variables.ScpVars.getRowsCoveredByColumn;
+import static main.java.variables.ScpVars.getRowsCoveredByColumnBitset;
 
 
 public class RepairUtils {
@@ -44,6 +45,22 @@ public class RepairUtils {
         return selectedColumn;
     }
 
+    public int getColumnMinRatioBitSet(List<Integer> uRows, int rowIndex) {
+        List<Integer> ai = getColumnsCoveringRow(rowIndex);
+        BitSet uncoveredRows = uRows.stream().collect(BitSet::new, BitSet::set, BitSet::or);
+        return ai.stream()
+                .map(j -> {
+                    BitSet rowsCovered = getRowsCoveredByColumnBitset(j);
+                    BitSet ur = (BitSet) uncoveredRows.clone();
+                    ur.and(rowsCovered);
+                    double ratio = (double) getCost(j) / ur.cardinality();
+                    return new Tuple2<>(j, ratio);
+                })
+                .sorted(Comparator.comparing(Tuple2::getT2))
+                .map(Tuple2::getT1)
+                .collect(Collectors.toList()).get(0);
+    }
+
     public int getColumnMinRatioStream(List<Integer> uncoveredRows, int rowIndex) {
         List<Integer> ai = getColumnsCoveringRow(rowIndex);
         return ai.stream()
@@ -72,7 +89,7 @@ public class RepairUtils {
     }
 
     public int getColumnMaxRatio(BitSet solution) {
-        List<Integer> columnsCovering = cUtils.getColumns(solution);
+        List<Integer> columnsCovering = cUtils.getBitsetIndexes(solution);
         List<Double> ratioList = new ArrayList<>();
 
         for (int columnIndex : columnsCovering) {
@@ -94,7 +111,7 @@ public class RepairUtils {
     }
 
     public int getColumnMaxRatioStream(BitSet solution) {
-        List<Integer> columnsCovering = cUtils.getColumns(solution);
+        List<Integer> columnsCovering = cUtils.getBitsetIndexes(solution);
         return columnsCovering.stream()
                 .map(columnIndex -> {
                     List<Integer> rowsCovered = getRowsCoveredByColumn(columnIndex);

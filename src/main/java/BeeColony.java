@@ -72,9 +72,10 @@ public class BeeColony {
                     if (!distinctColumns.isEmpty()) {
                         bUtils.addColumns(fs, distinctColumns);
                         bUtils.dropColumns(fs);
-                        List<Integer> uncoveredRows = cUtils.uncoveredRowsStream(fs);
+                        BitSet uncoveredRows = cUtils.uncoveredRowsBitset(fs);
                         if (!uncoveredRows.isEmpty()) {
-                            repair.applyRepairSolution(fs, uncoveredRows);
+                            List<Integer> uncoveredRowsList = cUtils.getBitsetIndexes(uncoveredRows);
+                            repair.applyRepairSolution(fs, uncoveredRowsList);
                         }
                         fs = localSearch.apply(fs);
                         memorizeSource(fs, i);
@@ -129,9 +130,10 @@ public class BeeColony {
                     List<Integer> distinctColumns = cUtils.getColumnsRandomFoodSource(fs, i.get());
                     bUtils.addColumns(fs, distinctColumns);
                     bUtils.dropColumns(fs);
-                    List<Integer> uncoveredRows = cUtils.uncoveredRowsStream(fs);
+                    BitSet uncoveredRows = cUtils.uncoveredRowsBitset(fs);
                     if (!uncoveredRows.isEmpty()) {
-                        repair.applyRepairSolution(fs, uncoveredRows);
+                        List<Integer> uncoveredRowsList = cUtils.getBitsetIndexes(uncoveredRows);
+                        repair.applyRepairSolution(fs, uncoveredRowsList);
                     }
                     fs = localSearch.apply(fs);
                     memorizeSource(fs, i.get());
@@ -186,20 +188,20 @@ public class BeeColony {
     }
 
 
-    private void memorizeSource(BitSet newFoodSource, int i) {
-        int newFitness = cUtils.calculateFitnessOneStream(newFoodSource);
+    private void memorizeSource(BitSet newfs, int i) {
+        int newFitness = cUtils.calculateFitnessOneStream(newfs);
         int currFitness = vr.getFitness(i);
 
         if (currFitness > newFitness) {
-            vr.setFoodSource(i, newFoodSource);
+            vr.setFoodSource(i, (BitSet) newfs.clone());
             vr.setFitness(i, newFitness);
             vr.setTrial(i, 0);
         } else if (currFitness == newFitness) {
-            int newFitnessTwo = cUtils.calculateFitnessTwoStream(newFoodSource);
+            int newFitnessTwo = cUtils.calculateFitnessTwoStream(newfs);
             int currFitnessTwo = cUtils.calculateFitnessTwoStream(vr.getFoodSource(i));
 
             if (currFitnessTwo > newFitnessTwo) {
-                vr.setFoodSource(i, newFoodSource);
+                vr.setFoodSource(i, (BitSet) newfs.clone());
                 vr.setTrial(i, 0);
 //                TRIAL[i] = 0;
             } else {

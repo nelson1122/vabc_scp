@@ -9,7 +9,6 @@ import java.util.BitSet;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 
 import static main.java.config.Parameters.Pa;
 import static main.java.variables.ScpVars.getCost;
@@ -29,7 +28,7 @@ public class Repair {
 
     public void applyRepairSolution(BitSet xj, List<Integer> uncoveredRows) {
         makeSolutionFeasible(xj, uncoveredRows);
-        removeRedundantColumnsRecursive(xj);
+        removeRedundantColumnsStream(xj);
     }
 
     private void makeSolutionFeasible(BitSet xj, List<Integer> uncoveredRows) {
@@ -41,42 +40,44 @@ public class Repair {
             double rNum = Math.round(r * 1000) / 1000.0;
 
             if (rNum <= Pa) {
-                indexColumn = rUtils.getColumnMinRatioStream(uncoveredRows, indexRowUncovered);
+                indexColumn = rUtils.getColumnMinRatioBitSet(uncoveredRows, indexRowUncovered);
             } else {
                 indexColumn = rUtils.selectRandomColumnFromRCL(indexRowUncovered);
             }
             xj.set(indexColumn);
-            // uncoveredRows = cUtils.uncoveredRowsStream(solution);
-            cUtils.updateUncoveredRows(uncoveredRows, indexColumn);
+            // uncoveredRows = cUtils.uncoveredRowsStream(xj);
+            uncoveredRows = cUtils.uncoveredRowsBitSet(uncoveredRows, indexColumn);
         }
     }
 
-    private void removeRedundantColumns(BitSet solution) {
-        boolean feasible = true;
-        while (feasible) {
-            int columnIndex = rUtils.getColumnMaxRatio(solution);
-            solution.set(columnIndex, false);
-            List<Integer> uncoveredRows = cUtils.uncoveredRowsStream(solution);
-            if (!uncoveredRows.isEmpty()) {
-                solution.set(columnIndex);
-                feasible = false;
+    /*
+        private void removeRedundantColumns(BitSet solution) {
+            boolean feasible = true;
+            while (feasible) {
+                int columnIndex = rUtils.getColumnMaxRatio(solution);
+                solution.set(columnIndex, false);
+                List<Integer> uncoveredRows = cUtils.uncoveredRowsStream(solution);
+                if (!uncoveredRows.isEmpty()) {
+                    solution.set(columnIndex);
+                    feasible = false;
+                }
             }
         }
-    }
-
-    private void removeRedundantColumnsRecursive(BitSet xj) {
-        xj.stream()
+    */
+    private void removeRedundantColumnsStream(BitSet xj) {
+        BitSet xjc = (BitSet) xj.clone();
+        xjc.stream()
                 .boxed()
                 .map(j -> {
                     List<Integer> rowsCovered = getRowsCoveredByColumn(j);
-                    double ratio = getCost(j) * 1.0 / rowsCovered.size();
+                    double ratio = (double) getCost(j) / rowsCovered.size();
                     return new Tuple2<>(j, ratio);
                 })
                 .sorted(Collections.reverseOrder(Comparator.comparing(Tuple2::getT2)))
                 .map(Tuple2::getT1)
                 .forEach(columnIndex -> {
                     xj.clear(columnIndex);
-                    List<Integer> uncoveredRows = cUtils.uncoveredRowsStream(xj);
+                    BitSet uncoveredRows = cUtils.uncoveredRowsBitset(xj);
                     if (!uncoveredRows.isEmpty()) {
                         xj.set(columnIndex);
                     }

@@ -5,6 +5,7 @@ import main.java.utils.Logger;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.List;
 import java.util.Scanner;
 
@@ -13,6 +14,7 @@ import static main.java.variables.ScpVars.COLUMNSCOVERINGROW;
 import static main.java.variables.ScpVars.COSTS;
 import static main.java.variables.ScpVars.ROWS;
 import static main.java.variables.ScpVars.ROWSCOVEREDBYCOLUMN;
+import static main.java.variables.ScpVars.getColumnsCoveringRowBitset;
 
 public class Problem {
     private static final Logger logger = new Logger();

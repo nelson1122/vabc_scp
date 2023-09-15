@@ -15,7 +15,7 @@ import java.util.stream.IntStream;
 import static main.java.variables.ScpVars.ROWS;
 import static main.java.variables.ScpVars.getColumnsCoveringRow;
 import static main.java.variables.ScpVars.getCost;
-import static main.java.variables.ScpVars.getRowsCoveredByColumn;
+import static main.java.variables.ScpVars.getRowsCoveredByColumnBitset;
 
 public class IterativeConstruction {
 
@@ -85,10 +85,10 @@ public class IterativeConstruction {
     }
 
     private double calculateFunction(BitSet xj, int j, int rFunction) {
-        List<Integer> uncoveredRows = cUtils.uncoveredRowsStream(xj);
-        List<Integer> rowsCoveredByColumn = getRowsCoveredByColumn(j);
-        List<Integer> uncoveredRowsCovered = rUtils.getUncoveredRowsCoveredByColumn(uncoveredRows, rowsCoveredByColumn);
-        int Pj = uncoveredRowsCovered.size();
+        BitSet uncoveredRows = cUtils.uncoveredRowsBitset(xj);
+        BitSet rowsCoveredByColumn = getRowsCoveredByColumnBitset(j);
+        uncoveredRows.and(rowsCoveredByColumn);
+        int Pj = uncoveredRows.cardinality();
         double result = 0;
         switch (rFunction) {
             case 0:
@@ -157,7 +157,7 @@ public class IterativeConstruction {
                     .get();
             xj.set(j);
         }
-        List<Integer> uncoveredRows = cUtils.uncoveredRowsStream(xj);
+        BitSet uncoveredRows = cUtils.uncoveredRowsBitset(xj);
         if (uncoveredRows.isEmpty()) {
             return xj;
         }

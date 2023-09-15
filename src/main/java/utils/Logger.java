@@ -109,6 +109,13 @@ public class Logger {
         System.out.println(progress);
     }
 
+    public void printSolution(BitSet result) {
+        List<String> indexes = result.stream()
+                .mapToObj(String::valueOf)
+                .collect(Collectors.toList());
+        log("GLOBALPARAMS => {" + String.join(", ", indexes) + "}");
+    }
+
     public void printLog2(int x) {
         String progress = "";
         for (int y = 0; y < RUNS[x] / 10; y++) {
@@ -121,7 +128,7 @@ public class Logger {
                 "iter: " + RUNS[x] + " | " +
                 "Best: " + GLOBALMINS[x] + " ] ==> " +
                 progress.concat(" " + Math.round(progDecimal * 100) / 100.0 + "%");
-        System.out.print(String.format("\033[%dA" , 0));
+        System.out.print(String.format("\033[%dA", 0));
         System.out.println(progress);
     }
 }

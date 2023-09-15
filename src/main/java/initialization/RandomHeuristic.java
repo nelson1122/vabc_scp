@@ -19,6 +19,7 @@ import static main.java.variables.ScpVars.ROWS;
 import static main.java.variables.ScpVars.getColumnsCoveringRow;
 import static main.java.variables.ScpVars.getCost;
 import static main.java.variables.ScpVars.getRowsCoveredByColumn;
+import static main.java.variables.ScpVars.getRowsCoveredByColumnBitset;
 
 public class RandomHeuristic {
     private final CommonUtils cUtils;
@@ -34,19 +35,20 @@ public class RandomHeuristic {
         int randomColumn = cUtils.randomNumber(COLUMNS);
         xj.set(randomColumn);
 
-        List<Integer> uncoveredRows = cUtils.uncoveredRowsStream(xj);
+        BitSet uncoveredRows = cUtils.uncoveredRowsBitset(xj);
         while (!uncoveredRows.isEmpty()) {
             int j = applyHeuristic(xj);
             xj.set(j);
-            uncoveredRows = cUtils.uncoveredRowsStream(xj);
+            uncoveredRows = cUtils.uncoveredRowsBitset(xj);
         }
         removeRepeatedColumns(xj);
         return xj;
     }
 
     private int applyHeuristic(BitSet xj) {
-        List<Integer> uncoveredRows = cUtils.uncoveredRowsStream(xj);
+        BitSet uncoveredRows = cUtils.uncoveredRowsBitset(xj);
         List<Integer> lRows = uncoveredRows.stream()
+                .boxed()
                 .map(i -> {
                     int Li = getColumnsCoveringRow(i).size();
                     return new Tuple2<>(i, 1.0 / Li);
@@ -62,9 +64,9 @@ public class RandomHeuristic {
                 .flatMap(Collection::stream)
                 .distinct()
                 .map(j -> {
-                    List<Integer> Mj = getRowsCoveredByColumn(j);
-                    List<Integer> uncoveredRowsCovered = rUtils.getUncoveredRowsCoveredByColumn(uncoveredRows, Mj);
-                    return new Tuple2<>(j, getCost(j) * 1.0 / uncoveredRowsCovered.size());
+                    BitSet Mj = getRowsCoveredByColumnBitset(j);
+                    Mj.and(uncoveredRows);
+                    return new Tuple2<>(j, getCost(j) * 1.0 / Mj.cardinality());
                 })
                 .sorted(Comparator.comparingDouble(Tuple2::getT2))
                 //.sorted(Collections.reverseOrder(Comparator.comparingDouble(Tuple2::getT2)))

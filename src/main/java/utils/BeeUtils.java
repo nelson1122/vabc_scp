@@ -49,7 +49,7 @@ public class BeeUtils {
 
     public void dropColumns(BitSet xj) {
         int n = xj.cardinality();
-        List<Integer> columns = cUtils.getColumns(xj);
+        List<Integer> columns = cUtils.getBitsetIndexes(xj);
         int colDrop;
 
         if (n < 5) {

@@ -15,35 +15,35 @@ import static main.java.config.Parameters.MAX_CYCLE;
 import static main.java.config.Parameters.RUNTIME;
 
 public class Main {
-    /*
+
     static String groupName = "I";
     static String[] fileNames = {
-            "scpnre1.txt",
-            "scpnre2.txt",
-            "scpnre3.txt",
-            "scpnre4.txt",
-            "scpnre5.txt",
+//            "scpnre1.txt",
+//            "scpnre2.txt",
+//            "scpnre3.txt",
+//            "scpnre4.txt",
+//            "scpnre5.txt",
             "scpnrg1.txt",
             "scpnrg2.txt",
             "scpnrg3.txt",
             "scpnrg4.txt",
             "scpnrg5.txt",
     };
-     */
 
-    static String groupName = "II";
-    static String[] fileNames = {
-            "scpnrf1.txt",
-            "scpnrf2.txt",
-            "scpnrf3.txt",
-            "scpnrf4.txt",
-            "scpnrf5.txt",
-            "scpnrh1.txt",
-            "scpnrh2.txt",
-            "scpnrh3.txt",
-            "scpnrh4.txt",
-            "scpnrh5.txt",
-    };
+
+//    static String groupName = "II";
+//    static String[] fileNames = {
+//            "scpnrf1.txt",
+//            "scpnrf2.txt",
+//            "scpnrf3.txt",
+//            "scpnrf4.txt",
+//            "scpnrf5.txt",
+//            "scpnrh1.txt",
+//            "scpnrh2.txt",
+//            "scpnrh3.txt",
+//            "scpnrh4.txt",
+//            "scpnrh5.txt",
+//    };
 
     static int seed = 50;
     static Logger logger = new Logger();
@@ -53,9 +53,9 @@ public class Main {
         logger.log("University of Cauca, 2023");
         logger.log("Problems Group: [ " + groupName + " ]");
 
-        // runABCSCPMonoThread();
-        // runABCSCPMonoThread2();
-        runABCSCPMultiThread();
+        runABCSCPMonoThread();
+//        runABCSCPMonoThread2();
+//        runABCSCPMultiThread();
 
         logger.log("Algorithm has finished!");
     }
@@ -113,9 +113,9 @@ public class Main {
 
     public static void runABCSCPMonoThread() {
         try {
-            Problem.read("main/resources/scpnrg1.txt");
-            // Problem.read("src/main/resources/scpnrg1.txt");
-            AbcVars vr = new AbcVars(seed);
+//            Problem.read("main/resources/scpnrg1.txt");
+            Problem.read("src/main/resources/scpnrg2.txt");
+            AbcVars vr = new AbcVars(250);
             BeeColony bee = new BeeColony(vr);
             bee.initial();
             bee.memorizeBestSource();
@@ -129,7 +129,7 @@ public class Main {
                 logger.setGlobalMin(0, vr.getGLOBAL_MIN());
                 logger.printLog(0);
             }
-            vr.addGlobalMin(vr.getGLOBAL_MIN());
+            logger.printSolution(vr.getGLOBAL_PARAMS());
         } catch (Exception ex) {
             ex.printStackTrace();
         }

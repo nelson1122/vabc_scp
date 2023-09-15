@@ -1,6 +1,9 @@
 package main.java.variables;
 
+import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ScpVars {
     private ScpVars(){
@@ -14,9 +17,18 @@ public class ScpVars {
         return COSTS.get(j);
     }
     public static List<Integer> getColumnsCoveringRow(int i) {
-        return COLUMNSCOVERINGROW.get(i);
+        return new ArrayList<>(COLUMNSCOVERINGROW.get(i));
     }
     public static List<Integer> getRowsCoveredByColumn(int j) {
-        return ROWSCOVEREDBYCOLUMN.get(j);
+        return new ArrayList<>(ROWSCOVEREDBYCOLUMN.get(j));
+    }
+
+    public static BitSet getColumnsCoveringRowBitset(int i) {
+        return COLUMNSCOVERINGROW.get(i).stream()
+                .collect(BitSet::new, BitSet::set,BitSet::or);
+    }
+    public static BitSet getRowsCoveredByColumnBitset(int j) {
+        return ROWSCOVEREDBYCOLUMN.get(j).stream()
+                .collect(BitSet::new, BitSet::set,BitSet::or);
     }
 }
