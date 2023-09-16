@@ -16,34 +16,34 @@ import static main.java.config.Parameters.RUNTIME;
 
 public class Main {
 
-    static String groupName = "I";
-    static String[] fileNames = {
+//    static String groupName = "I";
+//    static String[] fileNames = {
 //            "scpnre1.txt",
 //            "scpnre2.txt",
 //            "scpnre3.txt",
 //            "scpnre4.txt",
 //            "scpnre5.txt",
-            "scpnrg1.txt",
-            "scpnrg2.txt",
-            "scpnrg3.txt",
-            "scpnrg4.txt",
-            "scpnrg5.txt",
-    };
+//            "scpnrg1.txt",
+//            "scpnrg2.txt",
+//            "scpnrg3.txt",
+//            "scpnrg4.txt",
+//            "scpnrg5.txt",
+//    };
 
 
-//    static String groupName = "II";
-//    static String[] fileNames = {
+    static String groupName = "II";
+    static String[] fileNames = {
 //            "scpnrf1.txt",
 //            "scpnrf2.txt",
 //            "scpnrf3.txt",
 //            "scpnrf4.txt",
 //            "scpnrf5.txt",
-//            "scpnrh1.txt",
-//            "scpnrh2.txt",
-//            "scpnrh3.txt",
-//            "scpnrh4.txt",
-//            "scpnrh5.txt",
-//    };
+            "scpnrh1.txt",
+            "scpnrh2.txt",
+            "scpnrh3.txt",
+            "scpnrh4.txt",
+            "scpnrh5.txt",
+    };
 
     static int seed = 50;
     static Logger logger = new Logger();
@@ -114,8 +114,8 @@ public class Main {
     public static void runABCSCPMonoThread() {
         try {
 //            Problem.read("main/resources/scpnrg1.txt");
-            Problem.read("src/main/resources/scpnrg2.txt");
-            AbcVars vr = new AbcVars(250);
+            Problem.read("src/main/resources/scpnrg3.txt");
+            AbcVars vr = new AbcVars(150);
             BeeColony bee = new BeeColony(vr);
             bee.initial();
             bee.memorizeBestSource();

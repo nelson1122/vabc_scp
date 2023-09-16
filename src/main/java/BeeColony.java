@@ -2,17 +2,22 @@ package main.java;
 
 import main.java.utils.BeeUtils;
 import main.java.utils.CommonUtils;
+import main.java.utils.Tuple2;
 import main.java.variables.AbcVars;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.BitSet;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static main.java.config.Parameters.EMPLOYED_BEES;
 import static main.java.config.Parameters.FOOD_NUMBER;
 import static main.java.config.Parameters.LIMIT;
+import static main.java.config.Parameters.ONLOOKER_BEES;
 
 public class BeeColony {
     private AbcVars vr;
@@ -38,7 +43,7 @@ public class BeeColony {
         vr.setFOODS(new ArrayList<>());
         vr.setFITNESS(new ArrayList<>());
         vr.setTRIAL(new int[FOOD_NUMBER]);
-        vr.setPROB(new ArrayList<>());
+        vr.setPROB(Arrays.asList(new Double[FOOD_NUMBER]));
 /*
         for (int i = 0; i < FOOD_NUMBER; i++) {
             BitSet newFoodSource = initialization.createSolution();
@@ -111,17 +116,24 @@ public class BeeColony {
     public void sendOnlookerBees() {
         AtomicInteger i = new AtomicInteger(0);
 
-        IntStream.range(0, EMPLOYED_BEES)
+        IntStream.range(0, ONLOOKER_BEES)
                 .boxed()
                 .forEach(t -> {
                     double randomValue = vr.getRANDOM().nextDouble() * 100.0 / 100.0;
                     double rNum = Math.round(randomValue * 10) / 10.0;
 
+                    List<Tuple2<Integer, Double>> probs =
+                            IntStream.range(0, vr.getPROB().size())
+                                    .boxed()
+                                    .map(p -> new Tuple2<>(p, vr.getProbability(p)))
+                                    .sorted(Comparator.comparing(Tuple2::getT2))
+                                    .collect(Collectors.toList());
+
                     double cumulativeProbability = 0.0;
                     for (int fs = 0; fs < FOOD_NUMBER; fs++) {
-                        cumulativeProbability += vr.getProbability(fs);
+                        cumulativeProbability += probs.get(fs).getT2();
                         if (rNum <= cumulativeProbability) {
-                            i.set(fs);
+                            i.set(probs.get(fs).getT1());
                             break;
                         }
                     }
@@ -205,7 +217,7 @@ public class BeeColony {
                 vr.setTrial(i, 0);
 //                TRIAL[i] = 0;
             } else {
-//                vr.incrementTrial(i);
+                vr.incrementTrial(i);
 //                TRIAL[i]++;
             }
         } else {
@@ -265,7 +277,7 @@ public class BeeColony {
         }
         for (int i = 0; i < FOOD_NUMBER; i++) {
             double result = vr.getFitness(i) / sumFitness;
-            vr.addProbability(result);
+            vr.setProbability(i, result);
         }
 
     }
@@ -279,7 +291,7 @@ public class BeeColony {
         }
         for (int i = 0; i < FOOD_NUMBER; i++) {
             double result = (0.9 * (vr.getFitness(i) / maxfit)) + 0.1;
-            vr.addProbability(result);
+            vr.setProbability(i, result);
         }
     }
 }

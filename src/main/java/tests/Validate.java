@@ -3,6 +3,7 @@ package main.java.tests;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,8 +18,7 @@ public class Validate {
     private static Integer[] run8 = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 41, 42, 44, 48, 49, 50, 53, 54, 55, 57, 58, 59, 60, 61, 63, 68, 72, 75, 77, 80, 89, 93, 94, 97, 98, 100, 102, 105, 109, 112, 113, 114, 117, 125, 126, 128, 129, 131, 132, 137, 138, 140, 147, 154, 159, 160, 163, 175, 176, 216, 221, 225, 234, 235, 236, 255, 257, 276, 287, 293, 316, 329, 338, 387, 475};
     private static Integer[] run9 = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 41, 42, 48, 49, 50, 53, 54, 55, 57, 58, 59, 60, 61, 68, 72, 75, 77, 80, 88, 89, 93, 94, 97, 98, 100, 102, 105, 109, 112, 113, 114, 117, 121, 125, 126, 128, 129, 131, 132, 137, 140, 147, 154, 159, 160, 163, 166, 175, 176, 181, 216, 221, 225, 234, 235, 236, 255, 257, 276, 287, 293, 338, 360, 387, 475};
     private static Integer[] run10 = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 41, 42, 44, 48, 49, 50, 53, 54, 55, 57, 58, 59, 60, 61, 63, 68, 72, 75, 77, 80, 89, 93, 94, 97, 98, 100, 102, 105, 109, 112, 113, 114, 117, 125, 126, 128, 129, 131, 132, 137, 138, 140, 147, 154, 159, 160, 163, 175, 176, 216, 221, 225, 234, 235, 236, 255, 257, 276, 287, 293, 316, 329, 338, 387, 475};
-
-
+    private static List<BitSet> sListBitSet;
 
     public static void main(String[] args) {
         List<List<Integer>> sList = new ArrayList<>();
@@ -32,15 +32,43 @@ public class Validate {
         sList.add(Arrays.asList(run9));
         sList.add(Arrays.asList(run10));
 
-        List<BitSet> sListBitSet = sList.stream()
+        sListBitSet = sList.stream()
                 .map(x -> x.stream().collect(BitSet::new, BitSet::set, BitSet::or))
                 .collect(Collectors.toList());
 
+        findBadColumns();
+        findBestColumns();
+    }
+
+    private static void findBadColumns() {
         BitSet sError = Arrays.stream(run4)
                 .collect(BitSet::new, BitSet::set, BitSet::or);
 
-        sListBitSet.forEach(sError::andNot);
+        BitSet badCols = sListBitSet.stream()
+                .map(s -> {
+                    BitSet sErrorCopy = (BitSet) sError.clone();
+                    sErrorCopy.andNot(s);
+                    return sErrorCopy;
+                }).sorted(Comparator.comparing(BitSet::cardinality))
+                .collect(Collectors.toList())
+                .get(0);
 
-        System.out.println(sError);
+        System.out.println("Columns to remove ==> " + badCols);
+    }
+
+    private static void findBestColumns() {
+        BitSet sError = Arrays.stream(run4)
+                .collect(BitSet::new, BitSet::set, BitSet::or);
+
+        BitSet bestCols = sListBitSet.stream()
+                .map(s -> {
+                    s.andNot(sError);
+                    return s;
+                }).sorted(Comparator.comparing(BitSet::cardinality))
+                .collect(Collectors.toList())
+                .get(0);
+
+
+        System.out.println("Columns to add ==> " + bestCols);
     }
 }

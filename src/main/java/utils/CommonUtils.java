@@ -50,10 +50,12 @@ public class CommonUtils {
     }
 
     public int calculateFitnessTwoStream(BitSet xj) {
-        return xj.stream()
+        BitSet xjc = (BitSet) xj.clone();
+        return xjc.stream()
                 .boxed()
                 .map(ScpVars::getRowsCoveredByColumn)
-                .map(List::size).reduce(Integer::sum)
+                .map(List::size)
+                .reduce(Integer::sum)
                 .get();
     }
 
@@ -163,12 +165,12 @@ public class CommonUtils {
                 .collect(Collectors.toList());
     }
 
-    public List<Integer> getColumnsRandomFoodSource(BitSet solution, int i) {
+    public List<Integer> getColumnsRandomFoodSource(BitSet xj, int i) {
         int randomFoodS = randomFoodSource(i);
-        List<Integer> distinctColumns = distinctColumnsBitSet(solution, vr.getFOODS().get(randomFoodS));
+        List<Integer> distinctColumns = distinctColumnsBitSet(xj, vr.getFoodSource(randomFoodS));
         if (!distinctColumns.isEmpty()) {
             return distinctColumns;
         }
-        return getColumnsRandomFoodSource(solution, i);
+        return getColumnsRandomFoodSource(xj, i);
     }
 }

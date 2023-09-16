@@ -2,8 +2,10 @@ package main.java.utils;
 
 import main.java.variables.AbcVars;
 
+import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static main.java.config.Parameters.COL_ADD_1;
 import static main.java.config.Parameters.COL_ADD_2;
@@ -15,12 +17,16 @@ public class BeeUtils {
     private final AbcVars vr;
     private final CommonUtils cUtils;
 
+    // private List<Integer> addedColumns;
+
     public BeeUtils(AbcVars v) {
         this.vr = v;
         this.cUtils = new CommonUtils(v);
     }
 
     public void addColumns(BitSet xj, List<Integer> distinctColumns) {
+        // addedColumns = new ArrayList<>();
+
         int n = xj.cardinality();
         int dc = distinctColumns.size();
         int colAdd;
@@ -37,14 +43,13 @@ public class BeeUtils {
             }
         }
 
+        // addedColumns.add(index);
         vr.getRANDOM().ints(0, dc)
+                .map(distinctColumns::get)
                 .distinct()
                 .limit(colAdd)
                 .boxed()
-                .forEach(x -> {
-                    int index = distinctColumns.get(x);
-                    xj.set(index);
-                });
+                .forEach(xj::set);
     }
 
     public void dropColumns(BitSet xj) {
@@ -61,12 +66,10 @@ public class BeeUtils {
         }
 
         vr.getRANDOM().ints(0, n)
+                .map(columns::get)
                 .distinct()
                 .limit(colDrop)
                 .boxed()
-                .forEach(x -> {
-                    int index = columns.get(x);
-                    xj.clear(index);
-                });
+                .forEach(xj::clear);
     }
 }

@@ -34,7 +34,7 @@ public class AbcVars {
     }
 
     public BitSet getGLOBAL_PARAMS() {
-        return GLOBAL_PARAMS;
+        return (BitSet) GLOBAL_PARAMS.clone();
     }
 
     public void setGLOBAL_PARAMS(BitSet GLOBAL_PARAMS) {
@@ -58,7 +58,7 @@ public class AbcVars {
     }
 
     public List<Double> getPROB() {
-        return PROB;
+        return new ArrayList<>(PROB);
     }
 
     public void setPROB(List<Double> PROB) {
@@ -146,8 +146,8 @@ public class AbcVars {
         this.TRIAL[i]++;
     }
 
-    public void addProbability(double value) {
-        this.PROB.add(value);
+    public void setProbability(int index, double value) {
+        this.PROB.set(index, value);
     }
 
     public boolean getGlobalParamsColumnValue(int j) {
