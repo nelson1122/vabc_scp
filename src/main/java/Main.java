@@ -45,7 +45,7 @@ public class Main {
             "scpnrh5.txt",
     };
 
-    static int seed = 50;
+    static int seed = 0;
     static Logger logger = new Logger();
 
     public static void main(String[] args) {
@@ -74,7 +74,7 @@ public class Main {
                         IntStream.range(0, RUNTIME)
                                 .sorted()
                                 .mapToObj(rIndex -> forkJoinPool.submit(() -> {
-                                    seed = seed + 50;
+                                    seed = seed + 100;
                                     logger.setSEED(rIndex, seed);
                                     AbcVars vr = new AbcVars(seed);
                                     BeeColony bee = new BeeColony(vr);
@@ -114,8 +114,8 @@ public class Main {
     public static void runABCSCPMonoThread() {
         try {
 //            Problem.read("main/resources/scpnrg1.txt");
-            Problem.read("src/main/resources/scpnrg3.txt");
-            AbcVars vr = new AbcVars(550);
+            Problem.read("src/main/resources/scp41.txt");
+            AbcVars vr = new AbcVars(140);
             BeeColony bee = new BeeColony(vr);
             bee.initial();
             bee.memorizeBestSource();

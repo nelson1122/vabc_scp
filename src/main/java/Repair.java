@@ -32,7 +32,6 @@ public class Repair {
     }
 
     private void makeSolutionFeasible(BitSet xj, List<Integer> uncoveredRows) {
-        double prob = Math.round((1 - Pa) * 100) / 100.0;
         while (!uncoveredRows.isEmpty()) {
             int indexRowUncovered = uncoveredRows.get(0);
             int indexColumn;
@@ -40,10 +39,10 @@ public class Repair {
             double r = (vr.getRANDOM().nextDouble() * 100.0) / 100.0;
             double rNum = Math.round(r * 1000) / 1000.0;
 
-            if (rNum <= prob) {
-                indexColumn = rUtils.selectRandomColumnFromRCL(indexRowUncovered);
-            } else {
+            if (rNum <= Pa) {
                 indexColumn = rUtils.getColumnMinRatioBitSet(uncoveredRows, indexRowUncovered);
+            } else {
+                indexColumn = rUtils.selectRandomColumnFromRCL(indexRowUncovered);
             }
 
             xj.set(indexColumn);

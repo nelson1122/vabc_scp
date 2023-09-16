@@ -58,7 +58,8 @@ public class RepairUtils {
                 })
                 .sorted(Comparator.comparing(Tuple2::getT2))
                 .map(Tuple2::getT1)
-                .collect(Collectors.toList()).get(0);
+                .collect(Collectors.toList())
+                .get(0);
     }
 
     public int getColumnMinRatioStream(List<Integer> uncoveredRows, int rowIndex) {

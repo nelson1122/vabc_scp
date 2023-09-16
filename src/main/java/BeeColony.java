@@ -125,7 +125,8 @@ public class BeeColony {
                     double cumulativeProbability = 0.0;
                     for (int fs = 0; fs < FOOD_NUMBER; fs++) {
                         cumulativeProbability += vr.getProbabilityValue(fs);
-                        if (rNum <= cumulativeProbability) {
+                        double prob = Math.round(cumulativeProbability * 10) / 10.0;
+                        if (rNum <= prob) {
                             i.set(vr.getProbabilityIndex(fs));
                             break;
                         }
@@ -195,8 +196,8 @@ public class BeeColony {
 
 
     private boolean memorizeSource(BitSet newfs, int i) {
-        int newFitness = cUtils.calculateFitnessOneStream(newfs);
         int currFitness = vr.getFitness(i);
+        int newFitness = cUtils.calculateFitnessOneStream(newfs);
         boolean improved = false;
 
         if (currFitness > newFitness) {
