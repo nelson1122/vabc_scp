@@ -1,6 +1,8 @@
 package main.java.variables;
 
 
+import main.java.utils.Tuple2;
+
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
@@ -12,6 +14,7 @@ public class AbcVars {
     private List<Integer> FITNESS;
     private int[] TRIAL;
     private List<Double> PROB;
+    private List<Tuple2<Integer, Double>> PROB_SORTED;
     private Integer GLOBAL_MIN;
     private List<Integer> GLOBAL_MINS;
     private Double MEAN;
@@ -63,6 +66,14 @@ public class AbcVars {
 
     public void setPROB(List<Double> PROB) {
         this.PROB = PROB;
+    }
+
+    public List<Tuple2<Integer, Double>> getPROB_SORTED() {
+        return new ArrayList<>(PROB_SORTED);
+    }
+
+    public void setPROB_SORTED(List<Tuple2<Integer, Double>> PROB_SORTED) {
+        this.PROB_SORTED = PROB_SORTED;
     }
 
     public Integer getGLOBAL_MIN() {
@@ -156,5 +167,15 @@ public class AbcVars {
 
     public void addGlobalMin(Integer value) {
         this.GLOBAL_MINS.add(value);
+    }
+
+    public double getProbabilityValue(int index) {
+        Tuple2<Integer, Double> prob = PROB_SORTED.get(index);
+        return prob.getT2();
+    }
+
+    public int getProbabilityIndex(int index) {
+        Tuple2<Integer, Double> prob = PROB_SORTED.get(index);
+        return prob.getT1();
     }
 }

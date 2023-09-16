@@ -115,7 +115,7 @@ public class Main {
         try {
 //            Problem.read("main/resources/scpnrg1.txt");
             Problem.read("src/main/resources/scpnrg3.txt");
-            AbcVars vr = new AbcVars(150);
+            AbcVars vr = new AbcVars(550);
             BeeColony bee = new BeeColony(vr);
             bee.initial();
             bee.memorizeBestSource();

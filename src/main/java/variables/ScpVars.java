@@ -17,10 +17,10 @@ public class ScpVars {
         return COSTS.get(j);
     }
     public static List<Integer> getColumnsCoveringRow(int i) {
-        return new ArrayList<>(COLUMNSCOVERINGROW.get(i));
+        return COLUMNSCOVERINGROW.get(i);
     }
     public static List<Integer> getRowsCoveredByColumn(int j) {
-        return new ArrayList<>(ROWSCOVEREDBYCOLUMN.get(j));
+        return ROWSCOVEREDBYCOLUMN.get(j);
     }
 
     public static BitSet getColumnsCoveringRowBitset(int i) {

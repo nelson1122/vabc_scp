@@ -122,18 +122,11 @@ public class BeeColony {
                     double randomValue = vr.getRANDOM().nextDouble() * 100.0 / 100.0;
                     double rNum = Math.round(randomValue * 10) / 10.0;
 
-                    List<Tuple2<Integer, Double>> probs =
-                            IntStream.range(0, vr.getPROB().size())
-                                    .boxed()
-                                    .map(p -> new Tuple2<>(p, vr.getProbability(p)))
-                                    .sorted(Comparator.comparing(Tuple2::getT2))
-                                    .collect(Collectors.toList());
-
                     double cumulativeProbability = 0.0;
                     for (int fs = 0; fs < FOOD_NUMBER; fs++) {
-                        cumulativeProbability += probs.get(fs).getT2();
+                        cumulativeProbability += vr.getProbabilityValue(fs);
                         if (rNum <= cumulativeProbability) {
-                            i.set(probs.get(fs).getT1());
+                            i.set(vr.getProbabilityIndex(fs));
                             break;
                         }
                     }
@@ -148,9 +141,10 @@ public class BeeColony {
                         repair.applyRepairSolution(fs, uncoveredRowsList);
                     }
                     fs = localSearch.apply(fs);
-                    memorizeSource(fs, i.get());
-                    calculateProbabilitiesOne();
-
+                    boolean improved = memorizeSource(fs, i.get());
+                    if (improved) {
+                        calculateProbabilitiesOne();
+                    }
                 });
 /*
         while (t < ONLOOKER_BEES) {
@@ -200,14 +194,16 @@ public class BeeColony {
     }
 
 
-    private void memorizeSource(BitSet newfs, int i) {
+    private boolean memorizeSource(BitSet newfs, int i) {
         int newFitness = cUtils.calculateFitnessOneStream(newfs);
         int currFitness = vr.getFitness(i);
+        boolean improved = false;
 
         if (currFitness > newFitness) {
             vr.setFoodSource(i, (BitSet) newfs.clone());
             vr.setFitness(i, newFitness);
             vr.setTrial(i, 0);
+            improved = true;
         } else if (currFitness == newFitness) {
             int newFitnessTwo = cUtils.calculateFitnessTwoStream(newfs);
             int currFitnessTwo = cUtils.calculateFitnessTwoStream(vr.getFoodSource(i));
@@ -215,14 +211,13 @@ public class BeeColony {
             if (currFitnessTwo > newFitnessTwo) {
                 vr.setFoodSource(i, (BitSet) newfs.clone());
                 vr.setTrial(i, 0);
-//                TRIAL[i] = 0;
             } else {
                 vr.incrementTrial(i);
-//                TRIAL[i]++;
             }
         } else {
             vr.incrementTrial(i);
         }
+        return improved;
     }
 
     public void memorizeBestSource() {
@@ -279,6 +274,14 @@ public class BeeColony {
             double result = vr.getFitness(i) / sumFitness;
             vr.setProbability(i, result);
         }
+
+        List<Tuple2<Integer, Double>> probSorted =
+                IntStream.range(0, FOOD_NUMBER)
+                        .boxed()
+                        .map(p -> new Tuple2<>(p, vr.getProbability(p)))
+                        .sorted(Comparator.comparing(Tuple2::getT2))
+                        .collect(Collectors.toList());
+        vr.setPROB_SORTED(probSorted);
 
     }
 
