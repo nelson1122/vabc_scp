@@ -3,12 +3,10 @@ package main.java.localsearch;
 import main.java.utils.CommonUtils;
 import main.java.utils.RepairUtils;
 import main.java.utils.Tuple2;
-import main.java.utils.Tuple3;
 import main.java.variables.AbcVars;
 
 import java.util.Arrays;
 import java.util.BitSet;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,6 +17,7 @@ import static main.java.variables.ScpVars.ROWS;
 import static main.java.variables.ScpVars.getColumnsCoveringRow;
 import static main.java.variables.ScpVars.getCost;
 import static main.java.variables.ScpVars.getRowsCoveredByColumn;
+import static main.java.variables.ScpVars.getRowsCoveredByColumnBitset;
 
 public class RowWeightedMutation {
 
@@ -59,11 +58,6 @@ public class RowWeightedMutation {
         boolean improved = true;
 
         while (improved) {
-
-//            if (uncoveredRows.isEmpty() && improved) {
-//                break;
-//            }
-
             while (uncoveredRows.isEmpty()) {
                 double maxScore = xjMutation.stream()
                         .boxed()
@@ -103,9 +97,9 @@ public class RowWeightedMutation {
 
                 updateSolutionAdd(foodNumber, colAdd, xjMutation);
                 uncoveredRows = cUtils.uncoveredRowsStream(xjMutation);
-                updateScoreColumnsInSolution(xjMutation, colAdd, uncoveredRows);
+                updateScoreColumnsInSolution(xjMutation, colAdd);
                 updateRowWeights(uncoveredRows);
-                updateScoreColumnsNotInSolution(xjMutation, colAdd, uncoveredRows);
+                updateScoreColumnsNotInSolution(xjMutation, colAdd);
             }
 
             improved = false;
@@ -168,21 +162,24 @@ public class RowWeightedMutation {
         sj[columnIndex] = score;
     }
 
-    private void updateScoreColumnsInSolution(BitSet xj, int columnIndex, List<Integer> uncoveredRows) {
+    private void updateScoreColumnsInSolution(BitSet xj, int columnIndex) {
         BitSet xjc = (BitSet) xj.clone();
-        List<Integer> rowsCoveredByColumn = getRowsCoveredByColumn(columnIndex);
-        List<Integer> uncoveredRowsCovered =
-                rUtils.getUncoveredRowsCoveredByColumn(uncoveredRows, rowsCoveredByColumn);
+        BitSet Bj = getRowsCoveredByColumnBitset(columnIndex);
 
         xjc.stream()
                 .boxed()
                 .filter(j -> !j.equals(columnIndex))
-                .forEach(j -> {
-                    double score = sj[j] + uncoveredRowsCovered.stream()
-                            .mapToDouble(ui -> (double) wi[ui] / getCost(ui))
+                .forEach(h -> {
+                    BitSet Bh = getRowsCoveredByColumnBitset(h);
+                    Bh.and(Bj);
+
+                    double score = sj[h] + Bh.stream()
+                            .boxed()
+                            .mapToDouble(ui -> (double) wi[ui] / getCost(h))
                             .sum();
+
                     score = Math.round(score * 100.0) / 100.0;
-                    sj[j] = score;
+                    sj[h] = score;
                 });
     }
 
@@ -190,20 +187,23 @@ public class RowWeightedMutation {
         uncoveredRows.forEach(i -> wi[i]++);
     }
 
-    private void updateScoreColumnsNotInSolution(BitSet xj, int columnIndex, List<Integer> uncoveredRows) {
-        List<Integer> rowsCoveredByColumn = getRowsCoveredByColumn(columnIndex);
-        List<Integer> uncoveredRowsCovered =
-                rUtils.getUncoveredRowsCoveredByColumn(uncoveredRows, rowsCoveredByColumn);
+    private void updateScoreColumnsNotInSolution(BitSet xj, int columnIndex) {
+        BitSet Bj = getRowsCoveredByColumnBitset(columnIndex);
 
         IntStream.range(0, COLUMNS)
                 .boxed()
                 .filter(j -> !xj.get(j))
-                .forEach(j -> {
-                    double score = sj[j] - uncoveredRowsCovered.stream()
-                            .mapToDouble(ui -> (double) wi[ui] / getCost(ui))
+                .forEach(h -> {
+                    BitSet Bh = getRowsCoveredByColumnBitset(h);
+                    Bh.and(Bj);
+
+                    double score = sj[h] - Bh.stream()
+                            .boxed()
+                            .mapToDouble(i -> (double) wi[i] / getCost(h))
                             .sum();
+
                     score = Math.round(score * 100.0) / 100.0;
-                    sj[j] = score;
+                    sj[h] = score;
                 });
     }
 
