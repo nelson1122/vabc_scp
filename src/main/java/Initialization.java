@@ -21,8 +21,8 @@ public class Initialization {
         this.iConstruction = new IterativeConstruction(v);
     }
 
-    public BitSet createSolution() {
-        return this.abcscp.createSolution();
+    public BitSet createSolution(int foodNumber) {
+        return this.abcscp.createSolution(foodNumber);
         // return this.randomMethod.createSolution();
         // return this.randomHeuristic.createSolution();
         // return this.iConstruction.createSolution();

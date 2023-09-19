@@ -87,10 +87,10 @@ public class Main {
                                         bee.memorizeBestSource();
                                         bee.sendScoutBees();
                                         logger.addProgress(rIndex);
-                                        logger.setGlobalMin(rIndex, vr.getGLOBAL_MIN());
+                                        logger.setGlobalMin(rIndex, vr.getGLOBALMIN());
                                     }
-                                    vr.addGlobalMin(vr.getGLOBAL_MIN());
-                                    return new Tuple3<>(rIndex, vr.getGLOBAL_MIN(), vr.getGLOBAL_PARAMS());
+                                    vr.addGlobalMin(vr.getGLOBALMIN());
+                                    return new Tuple3<>(rIndex, vr.getGLOBALMIN(), vr.getGLOBALPARAMS());
 
                                 }))
                                 .collect(Collectors.toList());
@@ -114,7 +114,7 @@ public class Main {
     public static void runABCSCPMonoThread() {
         try {
 //            Problem.read("main/resources/scpnrg1.txt");
-            Problem.read("src/main/resources/scp41.txt");
+            Problem.read("src/main/resources/scpnrg2.txt");
             AbcVars vr = new AbcVars(140);
             BeeColony bee = new BeeColony(vr);
             bee.initial();
@@ -126,10 +126,10 @@ public class Main {
                 bee.memorizeBestSource();
                 bee.sendScoutBees();
                 logger.addProgress(0);
-                logger.setGlobalMin(0, vr.getGLOBAL_MIN());
+                logger.setGlobalMin(0, vr.getGLOBALMIN());
                 logger.printLog(0);
             }
-            logger.printSolution(vr.getGLOBAL_PARAMS());
+            logger.printSolution(vr.getGLOBALPARAMS());
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -154,10 +154,10 @@ public class Main {
                     bee.memorizeBestSource();
                     bee.sendScoutBees();
                     logger.addProgress(run);
-                    logger.setGlobalMin(run, vr.getGLOBAL_MIN());
+                    logger.setGlobalMin(run, vr.getGLOBALMIN());
                     logger.printLog2(run);
                 }
-                vr.addGlobalMin(vr.getGLOBAL_MIN());
+                vr.addGlobalMin(vr.getGLOBALMIN());
             } catch (Exception ex) {
                 ex.printStackTrace();
             }

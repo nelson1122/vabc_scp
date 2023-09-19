@@ -17,21 +17,25 @@ import static main.java.variables.ScpVars.getRowsCoveredByColumn;
 
 
 public class ABCSCP {
+    private final AbcVars vr;
     private final CommonUtils cUtils;
 
     public ABCSCP(AbcVars v) {
+        this.vr = v;
         this.cUtils = new CommonUtils(v);
     }
 
-    public BitSet createSolution() {
+    public BitSet createSolution(int foodNumber) {
         BitSet xj = new BitSet(COLUMNS);
         int[] U = new int[ROWS];
-        generateSolution(xj, U);
-        removeRedundantColumns(xj, U);
+
+        generateSolution(foodNumber, xj, U);
+        removeRedundantColumns(foodNumber, xj, U);
+
         return xj;
     }
 
-    private void generateSolution(BitSet solution, int[] U) {
+    private void generateSolution(int foodNumber, BitSet xj, int[] U) {
         IntStream.range(0, ROWS)
                 .boxed()
                 .forEach(i -> {
@@ -40,8 +44,9 @@ public class ABCSCP {
                     int randomRC = cUtils.randomNumber(RC_SIZE);
                     int j = ai.get(randomRC);
 
-                    if (!solution.get(j)) {
-                        solution.set(j);
+                    if (!xj.get(j)) {
+                        xj.set(j);
+                        vr.increaseFoodBits(foodNumber, j);
                         List<Integer> Bj = getRowsCoveredByColumn(j);
                         Bj.forEach(idx -> U[idx]++);
                     }
@@ -64,7 +69,7 @@ public class ABCSCP {
          */
     }
 
-    private void removeRedundantColumns(BitSet xj, int[] U) {
+    private void removeRedundantColumns(int foodNumber, BitSet xj, int[] U) {
         int numColumns = xj.cardinality() + 1;
         IntStream.range(1, numColumns)
                 .boxed()
@@ -75,12 +80,12 @@ public class ABCSCP {
                     List<Integer> Bj = getRowsCoveredByColumn(j);
 
                     List<Integer> rowsCoveredByOneColumn =
-                            Bj.stream()
-                                    .filter(i -> U[i] < 2)
+                            Bj.stream().filter(i -> U[i] < 2)
                                     .collect(Collectors.toList());
 
                     if (rowsCoveredByOneColumn.isEmpty()) {
                         xj.clear(j);
+                        vr.increaseFoodBits(foodNumber, j);
                         Bj.forEach(idx -> U[idx]--);
                     }
                 });

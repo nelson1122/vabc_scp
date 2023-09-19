@@ -5,7 +5,6 @@ import main.java.variables.AbcVars;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static main.java.config.Parameters.COL_ADD_1;
 import static main.java.config.Parameters.COL_ADD_2;
@@ -23,7 +22,7 @@ public class BeeUtils {
         this.cUtils = new CommonUtils(v);
     }
 
-    public void addColumns(BitSet xj, List<Integer> distinctColumns) {
+    public void addColumns(int foodNumber, BitSet xj, List<Integer> distinctColumns) {
         addedColumns = new ArrayList<>();
 
         int n = xj.cardinality();
@@ -49,11 +48,12 @@ public class BeeUtils {
                 .boxed()
                 .forEach(j -> {
                     addedColumns.add(j);
+                    vr.increaseFoodBits(foodNumber, j);
                     xj.set(j);
                 });
     }
 
-    public void dropColumns(BitSet xj) {
+    public void dropColumns(int foodNumber, BitSet xj) {
         int n = xj.cardinality();
         List<Integer> columns = cUtils.getBitsetIndexes(xj);
         int colDrop;
@@ -72,6 +72,9 @@ public class BeeUtils {
                 .distinct()
                 .limit(colDrop)
                 .boxed()
-                .forEach(xj::clear);
+                .forEach(j -> {
+                    vr.increaseFoodBits(foodNumber, j);
+                    xj.clear(j);
+                });
     }
 }

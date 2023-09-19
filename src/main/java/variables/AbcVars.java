@@ -4,19 +4,23 @@ package main.java.variables;
 import main.java.utils.Tuple2;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class AbcVars {
     private List<BitSet> FOODS;
-    private BitSet GLOBAL_PARAMS;
+    private List<Integer[]> FOODSBITS;
+    private BitSet GLOBALPARAMS;
     private List<Integer> FITNESS;
     private int[] TRIAL;
     private List<Double> PROB;
-    private List<Tuple2<Integer, Double>> PROB_SORTED;
-    private Integer GLOBAL_MIN;
-    private List<Integer> GLOBAL_MINS;
+    private List<Tuple2<Integer, Double>> PROBSRW;
+    private Integer GLOBALMIN;
+    private List<Integer> GLOBALMINS;
     private Double MEAN;
     private Random RANDOM;
     private long SEED;
@@ -24,7 +28,7 @@ public class AbcVars {
     public AbcVars(long seed) {
         this.SEED = seed;
         this.RANDOM = new Random(seed);
-        this.GLOBAL_MINS = new ArrayList<>();
+        this.GLOBALMINS = new ArrayList<>();
         this.MEAN = 0d;
     }
 
@@ -36,12 +40,12 @@ public class AbcVars {
         this.FOODS = FOODS;
     }
 
-    public BitSet getGLOBAL_PARAMS() {
-        return (BitSet) GLOBAL_PARAMS.clone();
+    public BitSet getGLOBALPARAMS() {
+        return (BitSet) GLOBALPARAMS.clone();
     }
 
-    public void setGLOBAL_PARAMS(BitSet GLOBAL_PARAMS) {
-        this.GLOBAL_PARAMS = GLOBAL_PARAMS;
+    public void setGLOBALPARAMS(BitSet GLOBALPARAMS) {
+        this.GLOBALPARAMS = GLOBALPARAMS;
     }
 
     public List<Integer> getFITNESS() {
@@ -68,28 +72,28 @@ public class AbcVars {
         this.PROB = PROB;
     }
 
-    public List<Tuple2<Integer, Double>> getPROB_SORTED() {
-        return new ArrayList<>(PROB_SORTED);
+    public List<Tuple2<Integer, Double>> getPROBSRW() {
+        return new ArrayList<>(PROBSRW);
     }
 
-    public void setPROB_SORTED(List<Tuple2<Integer, Double>> PROB_SORTED) {
-        this.PROB_SORTED = PROB_SORTED;
+    public void setPROBSRW(List<Tuple2<Integer, Double>> PROBSRW) {
+        this.PROBSRW = PROBSRW;
     }
 
-    public Integer getGLOBAL_MIN() {
-        return GLOBAL_MIN;
+    public Integer getGLOBALMIN() {
+        return GLOBALMIN;
     }
 
-    public void setGLOBAL_MIN(Integer GLOBAL_MIN) {
-        this.GLOBAL_MIN = GLOBAL_MIN;
+    public void setGLOBALMIN(Integer GLOBALMIN) {
+        this.GLOBALMIN = GLOBALMIN;
     }
 
-    public List<Integer> getGLOBAL_MINS() {
-        return GLOBAL_MINS;
+    public List<Integer> getGLOBALMINS() {
+        return GLOBALMINS;
     }
 
-    public void setGLOBAL_MINS(List<Integer> GLOBAL_MINS) {
-        this.GLOBAL_MINS = GLOBAL_MINS;
+    public void setGLOBALMINS(List<Integer> GLOBALMINS) {
+        this.GLOBALMINS = GLOBALMINS;
     }
 
     public Double getMEAN() {
@@ -114,6 +118,14 @@ public class AbcVars {
 
     public void setSEED(long SEED) {
         this.SEED = SEED;
+    }
+
+    public List<Integer[]> getFOODSBITS() {
+        return FOODSBITS;
+    }
+
+    public void setFOODSBITS(List<Integer[]> FOODSBITS) {
+        this.FOODSBITS = FOODSBITS;
     }
 
     // Custom Methods
@@ -162,20 +174,42 @@ public class AbcVars {
     }
 
     public boolean getGlobalParamsColumnValue(int j) {
-        return this.GLOBAL_PARAMS.get(j);
+        return this.GLOBALPARAMS.get(j);
     }
 
     public void addGlobalMin(Integer value) {
-        this.GLOBAL_MINS.add(value);
+        this.GLOBALMINS.add(value);
     }
 
     public double getProbabilityValue(int index) {
-        Tuple2<Integer, Double> prob = PROB_SORTED.get(index);
+        Tuple2<Integer, Double> prob = PROBSRW.get(index);
         return prob.getT2();
     }
 
     public int getProbabilityIndex(int index) {
-        Tuple2<Integer, Double> prob = PROB_SORTED.get(index);
+        Tuple2<Integer, Double> prob = PROBSRW.get(index);
         return prob.getT1();
+    }
+
+    public void setFoodsBits(int foodNumber, int column) {
+        this.FOODSBITS = IntStream.range(0, foodNumber)
+                .boxed()
+                .map(i -> new Integer[column])
+                .peek(bits -> Arrays.fill(bits, 0))
+                .collect(Collectors.toList());
+    }
+
+    public Integer[] getFoodBits(int foodNumber) {
+        return this.FOODSBITS.get(foodNumber);
+    }
+
+    public void increaseFoodBits(int foodNumber, int j) {
+        this.FOODSBITS.get(foodNumber)[j]++;
+    }
+
+    public void restartFoodBits(int foodNumber, int columns) {
+        Integer[] bits = new Integer[columns];
+        Arrays.fill(bits, 0);
+        this.FOODSBITS.set(foodNumber, bits);
     }
 }

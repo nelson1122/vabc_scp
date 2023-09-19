@@ -26,28 +26,29 @@ public class Repair {
         this.rUtils = new RepairUtils(v);
     }
 
-    public void applyRepairSolution(BitSet xj, List<Integer> uncoveredRows) {
-        makeSolutionFeasible(xj, uncoveredRows);
-        removeRedundantColumnsStream(xj);
+    public void applyRepairSolution(int foodSource, BitSet xj, List<Integer> uncoveredRows) {
+        makeSolutionFeasible(foodSource, xj, uncoveredRows);
+        removeRedundantColumnsStream(foodSource, xj);
     }
 
-    private void makeSolutionFeasible(BitSet xj, List<Integer> uncoveredRows) {
+    private void makeSolutionFeasible(int foodNumber, BitSet xj, List<Integer> uncoveredRows) {
         while (!uncoveredRows.isEmpty()) {
             int indexRowUncovered = uncoveredRows.get(0);
-            int indexColumn;
+            int columnIndex;
 
             double r = (vr.getRANDOM().nextDouble() * 100.0) / 100.0;
             double rNum = Math.round(r * 1000) / 1000.0;
 
             if (rNum <= Pa) {
-                indexColumn = rUtils.getColumnMinRatioBitSet(uncoveredRows, indexRowUncovered);
+                columnIndex = rUtils.getColumnMinRatioBitSet(uncoveredRows, indexRowUncovered);
             } else {
-                indexColumn = rUtils.selectRandomColumnFromRCL(indexRowUncovered);
+                columnIndex = rUtils.selectRandomColumnFromRCL(indexRowUncovered);
             }
 
-            xj.set(indexColumn);
+            xj.set(columnIndex);
+            vr.increaseFoodBits(foodNumber, columnIndex);
             // uncoveredRows = cUtils.uncoveredRowsStream(xj);
-            uncoveredRows = cUtils.uncoveredRowsBitSet(uncoveredRows, indexColumn);
+            uncoveredRows = cUtils.uncoveredRowsBitSet(uncoveredRows, columnIndex);
         }
     }
 
@@ -65,7 +66,7 @@ public class Repair {
             }
         }
     */
-    private void removeRedundantColumnsStream(BitSet xj) {
+    private void removeRedundantColumnsStream(int foodNumber, BitSet xj) {
         BitSet xjc = (BitSet) xj.clone();
         xjc.stream()
                 .boxed()
@@ -81,6 +82,8 @@ public class Repair {
                     BitSet uncoveredRows = cUtils.uncoveredRowsBitset(xj);
                     if (!uncoveredRows.isEmpty()) {
                         xj.set(columnIndex);
+                    } else {
+                        vr.increaseFoodBits(foodNumber, columnIndex);
                     }
                 });
     }

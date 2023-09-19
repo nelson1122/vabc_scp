@@ -18,6 +18,7 @@ import static main.java.config.Parameters.EMPLOYED_BEES;
 import static main.java.config.Parameters.FOOD_NUMBER;
 import static main.java.config.Parameters.LIMIT;
 import static main.java.config.Parameters.ONLOOKER_BEES;
+import static main.java.variables.ScpVars.COLUMNS;
 
 public class BeeColony {
     private AbcVars vr;
@@ -36,7 +37,7 @@ public class BeeColony {
         this.bUtils = new BeeUtils(v);
         this.initialization = new Initialization(v);
         this.repair = new Repair(v);
-        this.localSearch = new LocalSearch();
+        this.localSearch = new LocalSearch(v);
     }
 
     public void initial() {
@@ -44,49 +45,44 @@ public class BeeColony {
         vr.setFITNESS(new ArrayList<>());
         vr.setTRIAL(new int[FOOD_NUMBER]);
         vr.setPROB(Arrays.asList(new Double[FOOD_NUMBER]));
-/*
-        for (int i = 0; i < FOOD_NUMBER; i++) {
-            BitSet newFoodSource = initialization.createSolution();
-            vr.addFoodSource(newFoodSource);
-            vr.addFitness(cUtils.calculateFitnessOneStream(newFoodSource));
-            vr.setTrial(i, 0);
-        }
-*/
+        vr.setFoodsBits(FOOD_NUMBER, COLUMNS);
+
         IntStream.range(0, FOOD_NUMBER)
                 .boxed()
-                .forEach(i -> {
-                    BitSet newFoodSource = initialization.createSolution();
+                .forEach(fs -> {
+                    BitSet newFoodSource = initialization.createSolution(fs);
                     vr.addFoodSource(newFoodSource);
                     vr.addFitness(cUtils.calculateFitnessOneStream(newFoodSource));
-                    vr.setTrial(i, 0);
+                    vr.setTrial(fs, 0);
                 });
-        vr.setGLOBAL_MIN(vr.getFitness(0));
-        vr.setGLOBAL_PARAMS(vr.getFoodSource(0));
+
+        vr.setGLOBALMIN(vr.getFitness(0));
+        vr.setGLOBALPARAMS(vr.getFoodSource(0));
     }
 
     public void sendEmployedBees() {
         IntStream.range(0, EMPLOYED_BEES)
                 .boxed()
-                .forEach(i -> {
-                    BitSet fs = vr.getFoodSource(i);
+                .forEach(foodNumber -> {
+                    BitSet fs = vr.getFoodSource(foodNumber);
 
-                    int rIndex = cUtils.randomFoodSource(i);
+                    int rIndex = cUtils.randomFoodSource(foodNumber);
                     BitSet rfs = vr.getFoodSource(rIndex);
                     List<Integer> distinctColumns = cUtils.distinctColumnsBitSet(fs, rfs);
 
                     if (!distinctColumns.isEmpty()) {
-                        bUtils.addColumns(fs, distinctColumns);
-                        bUtils.dropColumns(fs);
+                        bUtils.addColumns(foodNumber, fs, distinctColumns);
+                        bUtils.dropColumns(foodNumber, fs);
                         BitSet uncoveredRows = cUtils.uncoveredRowsBitset(fs);
                         if (!uncoveredRows.isEmpty()) {
                             List<Integer> uncoveredRowsList = cUtils.getBitsetIndexes(uncoveredRows);
-                            repair.applyRepairSolution(fs, uncoveredRowsList);
+                            repair.applyRepairSolution(foodNumber, fs, uncoveredRowsList);
                         }
                         fs = localSearch.apply(fs);
-                        memorizeSource(fs, i);
+                        memorizeSource(fs, foodNumber);
 
                     } else {
-                        generateScoutBee(i);
+                        generateScoutBee(foodNumber);
                     }
                 });
 /*
@@ -114,7 +110,7 @@ public class BeeColony {
     }
 
     public void sendOnlookerBees() {
-        AtomicInteger i = new AtomicInteger(0);
+        AtomicInteger foodNumber = new AtomicInteger(0);
 
         IntStream.range(0, ONLOOKER_BEES)
                 .boxed()
@@ -127,22 +123,22 @@ public class BeeColony {
                         cumulativeProbability += vr.getProbabilityValue(fs);
                         double prob = Math.round(cumulativeProbability * 10) / 10.0;
                         if (rNum <= prob) {
-                            i.set(vr.getProbabilityIndex(fs));
+                            foodNumber.set(vr.getProbabilityIndex(fs));
                             break;
                         }
                     }
 
-                    BitSet fs = vr.getFoodSource(i.get());
-                    List<Integer> distinctColumns = cUtils.getColumnsRandomFoodSource(fs, i.get());
-                    bUtils.addColumns(fs, distinctColumns);
-                    bUtils.dropColumns(fs);
+                    BitSet fs = vr.getFoodSource(foodNumber.get());
+                    List<Integer> distinctColumns = cUtils.getColumnsRandomFoodSource(fs, foodNumber.get());
+                    bUtils.addColumns(foodNumber.get(), fs, distinctColumns);
+                    bUtils.dropColumns(foodNumber.get(), fs);
                     BitSet uncoveredRows = cUtils.uncoveredRowsBitset(fs);
                     if (!uncoveredRows.isEmpty()) {
                         List<Integer> uncoveredRowsList = cUtils.getBitsetIndexes(uncoveredRows);
-                        repair.applyRepairSolution(fs, uncoveredRowsList);
+                        repair.applyRepairSolution(foodNumber.get(), fs, uncoveredRowsList);
                     }
                     fs = localSearch.apply(fs);
-                    boolean improved = memorizeSource(fs, i.get());
+                    boolean improved = memorizeSource(fs, foodNumber.get());
                     if (improved) {
                         calculateProbabilitiesOne();
                     }
@@ -184,39 +180,39 @@ public class BeeColony {
     public void sendScoutBees() {
         IntStream.range(0, FOOD_NUMBER)
                 .boxed()
-                .filter(fs -> vr.getTrial(fs) > LIMIT)
-                .forEach(i -> {
-                    BitSet newFoodSource = initialization.createSolution();
+                .filter(foodNumber -> vr.getTrial(foodNumber) > LIMIT)
+                .forEach(foodNumber -> {
+                    BitSet newFoodSource = initialization.createSolution(foodNumber);
                     int fitness = cUtils.calculateFitnessOneStream(newFoodSource);
-                    vr.setFoodSource(i, newFoodSource);
-                    vr.setFitness(i, fitness);
-                    vr.setTrial(i, 0);
+                    vr.setFoodSource(foodNumber, newFoodSource);
+                    vr.setFitness(foodNumber, fitness);
+                    vr.setTrial(foodNumber, 0);
+                    // vr.restartFoodBits(foodNumber, COLUMNS);
                 });
     }
 
 
-    private boolean memorizeSource(BitSet newfs, int i) {
-        int currFitness = vr.getFitness(i);
+    private boolean memorizeSource(BitSet newfs, int foodNumber) {
+        int currFitness = vr.getFitness(foodNumber);
         int newFitness = cUtils.calculateFitnessOneStream(newfs);
         boolean improved = false;
 
         if (currFitness > newFitness) {
-            vr.setFoodSource(i, (BitSet) newfs.clone());
-            vr.setFitness(i, newFitness);
-            vr.setTrial(i, 0);
+            vr.setFoodSource(foodNumber, (BitSet) newfs.clone());
+            vr.setFitness(foodNumber, newFitness);
+            vr.setTrial(foodNumber, 0);
             improved = true;
         } else if (currFitness == newFitness) {
             int newFitnessTwo = cUtils.calculateFitnessTwoStream(newfs);
-            int currFitnessTwo = cUtils.calculateFitnessTwoStream(vr.getFoodSource(i));
-
+            int currFitnessTwo = cUtils.calculateFitnessTwoStream(vr.getFoodSource(foodNumber));
             if (currFitnessTwo > newFitnessTwo) {
-                vr.setFoodSource(i, (BitSet) newfs.clone());
-                vr.setTrial(i, 0);
+                vr.setFoodSource(foodNumber, (BitSet) newfs.clone());
+                vr.setTrial(foodNumber, 0);
             } else {
-                vr.incrementTrial(i);
+                vr.incrementTrial(foodNumber);
             }
         } else {
-            vr.incrementTrial(i);
+            vr.incrementTrial(foodNumber);
         }
         return improved;
     }
@@ -226,17 +222,17 @@ public class BeeColony {
                 .boxed()
                 .forEach(i -> {
                     int fitness = vr.getFitness(i);
-                    if (vr.getGLOBAL_MIN() == fitness) {
+                    if (vr.getGLOBALMIN() == fitness) {
                         BitSet currentFS = vr.getFoodSource(i);
-                        BitSet currentBestFS = vr.getGLOBAL_PARAMS();
+                        BitSet currentBestFS = vr.getGLOBALPARAMS();
                         int f = cUtils.calculateFitnessTwoStream(currentFS);
                         int fGlobal = cUtils.calculateFitnessTwoStream(currentBestFS);
                         if (fGlobal > f) {
-                            vr.setGLOBAL_PARAMS(vr.getFoodSource(i));
+                            vr.setGLOBALPARAMS(vr.getFoodSource(i));
                         }
-                    } else if (vr.getGLOBAL_MIN() > fitness) {
-                        vr.setGLOBAL_MIN(fitness);
-                        vr.setGLOBAL_PARAMS(vr.getFoodSource(i));
+                    } else if (vr.getGLOBALMIN() > fitness) {
+                        vr.setGLOBALMIN(fitness);
+                        vr.setGLOBALPARAMS(vr.getFoodSource(i));
                     }
                 });
 
@@ -258,11 +254,13 @@ public class BeeColony {
         }*/
     }
 
-    private void generateScoutBee(int i) {
-        BitSet newFoodSource = initialization.createSolution();
-        vr.setFoodSource(i, newFoodSource);
-        vr.setFitness(i, cUtils.calculateFitnessOneStream(newFoodSource));
-        vr.setTrial(i, 0);
+    private void generateScoutBee(int foodNumber) {
+        // vr.restartFoodBits(foodNumber, COLUMNS);
+
+        BitSet newFoodSource = initialization.createSolution(foodNumber);
+        vr.setFoodSource(foodNumber, newFoodSource);
+        vr.setFitness(foodNumber, cUtils.calculateFitnessOneStream(newFoodSource));
+        vr.setTrial(foodNumber, 0);
     }
 
 
@@ -282,7 +280,7 @@ public class BeeColony {
                         .map(p -> new Tuple2<>(p, vr.getProbability(p)))
                         .sorted(Comparator.comparing(Tuple2::getT2))
                         .collect(Collectors.toList());
-        vr.setPROB_SORTED(probSorted);
+        vr.setPROBSRW(probSorted);
 
     }
 
