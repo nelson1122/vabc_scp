@@ -24,18 +24,18 @@ public class RowWeightedMutation {
     private final AbcVars vr;
     private final CommonUtils cUtils;
     private final RepairUtils rUtils;
-    private Integer[] wi;
-    private Double[] pj;
-    private Double[] sj;
+    private int[] wi;
+    private double[] pj;
+    private double[] sj;
     private final int STOPCRITERIA = 50;
 
     public RowWeightedMutation(AbcVars vr) {
         this.vr = vr;
         this.cUtils = new CommonUtils(vr);
         this.rUtils = new RepairUtils(vr);
-        this.wi = new Integer[ROWS];
-        this.pj = new Double[COLUMNS];
-        this.sj = new Double[COLUMNS];
+        this.wi = new int[ROWS];
+        this.pj = new double[COLUMNS];
+        this.sj = new double[COLUMNS];
     }
 
     public BitSet apply(BitSet xj, int foodNumber) {
@@ -59,6 +59,8 @@ public class RowWeightedMutation {
         boolean improved = true;
 
         while (improved) {
+            improved = false;
+
             while (uncoveredRows.isEmpty()) {
                 double maxScore = xjMutation.stream()
                         .boxed()
@@ -103,7 +105,6 @@ public class RowWeightedMutation {
                 updateScoreColumnsNotInSolution(xjMutation, colAdd);
             }
 
-            improved = false;
             if (solutionImproved(xj, xjMutation)) {
                 xj = (BitSet) xjMutation.clone();
                 improved = true;
@@ -116,37 +117,36 @@ public class RowWeightedMutation {
     private void updateSolutionAdd(int foodNumber, int columnIndex, BitSet xj) {
         xj.set(columnIndex);
         vr.increaseFoodBits(foodNumber, columnIndex);
-        // vr.setFitness(foodNumber, vr.getFitness(foodNumber) + getCost(columnIndex));
         sj[columnIndex] = (-1) * sj[columnIndex];
     }
 
     private void updateSolutionDrop(int foodNumber, int columnIndex, BitSet xj) {
         xj.clear(columnIndex);
         vr.increaseFoodBits(foodNumber, columnIndex);
-        // vr.setFitness(foodNumber, vr.getFitness(foodNumber) - getCost(columnIndex));
     }
 
     private void calculateInitialPriority() {
-        pj = IntStream.range(0, COLUMNS)
+        IntStream.range(0, COLUMNS)
                 .boxed()
-                .map(j -> {
+                .forEach(j -> {
                     List<Integer> Bj = getRowsCoveredByColumn(j);
-                    return (double) Bj.size() / getCost(j);
-                })
-                .toArray(size -> new Double[COLUMNS]);
+                    double priority = (double) Bj.size() / getCost(j);
+                    pj[j] = priority;
+                });
     }
 
     private void calculateInitialScore(BitSet xj) {
-        sj = IntStream.range(0, COLUMNS)
+        IntStream.range(0, COLUMNS)
                 .boxed()
-                .map(j -> {
+                .forEach(j -> {
+                    double score;
                     if (xj.get(j)) {
-                        return (-1) * Math.round(pj[j] * 100.0) / 100.0;
+                        score = (-1) * Math.round(pj[j] * 100.0) / 100.0;
                     } else {
-                        return Math.round(pj[j] * 100.0) / 100.0;
+                        score = Math.round(pj[j] * 100.0) / 100.0;
                     }
-                })
-                .toArray(size -> new Double[COLUMNS]);
+                    sj[j] = score;
+                });
     }
 
     private void updateScore(int columnIndex, List<Integer> uncoveredRows) {

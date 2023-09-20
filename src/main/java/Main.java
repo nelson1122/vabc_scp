@@ -114,7 +114,7 @@ public class Main {
     public static void runABCSCPMonoThread() {
         try {
 //            Problem.read("main/resources/scpnrg1.txt");
-            Problem.read("src/main/resources/scpnrg2.txt");
+            Problem.read("src/main/resources/scpnrf5.txt");
             AbcVars vr = new AbcVars(140);
             BeeColony bee = new BeeColony(vr);
             bee.initial();

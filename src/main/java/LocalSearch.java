@@ -20,9 +20,8 @@ public class LocalSearch {
 
     public BitSet apply(BitSet xj) {
         // return xj;
-        return this.abcscp.applyLocalSearch(xj);
-
-        // return this.rowWeightedMutation.apply(xj, this.foodNumber);
+        // return this.abcscp.applyLocalSearch(xj);
+        return this.rowWeightedMutation.apply(xj, this.foodNumber);
     }
 
     public void setFoodNumber(int foodNumber) {
