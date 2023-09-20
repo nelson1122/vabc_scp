@@ -53,7 +53,8 @@ public class RowWeightedMutation {
 
         calculateInitialPriority();
         calculateInitialScore(xjMutation);
-        int t = 0;
+        int colDrop = 0;
+        int colAdd = 0;
 
         boolean improved = true;
 
@@ -65,7 +66,7 @@ public class RowWeightedMutation {
                         .max()
                         .getAsDouble();
 
-                int colDrop = xjMutation.stream()
+                colDrop = xjMutation.stream()
                         .filter(j -> sj[j] == maxScore)
                         .boxed()
                         .map(j -> new Tuple2<>(j, vr.getFoodBits(foodNumber)[j]))
@@ -88,7 +89,7 @@ public class RowWeightedMutation {
                         .max()
                         .getAsDouble();
 
-                int colAdd = cols.stream()
+                colAdd = cols.stream()
                         .filter(j -> sj[j] == maxScore)
                         .map(j -> new Tuple2<>(j, vr.getFoodBits(foodNumber)[j]))
                         .sorted(Comparator.comparing(Tuple2::getT2))
@@ -107,8 +108,6 @@ public class RowWeightedMutation {
                 xj = (BitSet) xjMutation.clone();
                 improved = true;
             }
-
-            t++;
         }
 
         return xj;

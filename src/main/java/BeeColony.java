@@ -78,7 +78,10 @@ public class BeeColony {
                             List<Integer> uncoveredRowsList = cUtils.getBitsetIndexes(uncoveredRows);
                             repair.applyRepairSolution(foodNumber, fs, uncoveredRowsList);
                         }
+
+                        localSearch.setFoodNumber(foodNumber);
                         fs = localSearch.apply(fs);
+
                         memorizeSource(fs, foodNumber);
 
                     } else {
@@ -137,7 +140,10 @@ public class BeeColony {
                         List<Integer> uncoveredRowsList = cUtils.getBitsetIndexes(uncoveredRows);
                         repair.applyRepairSolution(foodNumber.get(), fs, uncoveredRowsList);
                     }
+
+                    localSearch.setFoodNumber(foodNumber.get());
                     fs = localSearch.apply(fs);
+
                     boolean improved = memorizeSource(fs, foodNumber.get());
                     if (improved) {
                         calculateProbabilitiesOne();

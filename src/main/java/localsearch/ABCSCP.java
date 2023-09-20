@@ -1,13 +1,16 @@
 package main.java.localsearch;
 
+import main.java.utils.Tuple2;
 import main.java.variables.ScpVars;
 
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-import static main.java.variables.ScpVars.COLUMNS;
 import static main.java.variables.ScpVars.ROWS;
 import static main.java.variables.ScpVars.getColumnsCoveringRow;
 import static main.java.variables.ScpVars.getCost;
@@ -41,105 +44,121 @@ public class ABCSCP {
             Pj.add(rowsCoveredByOneColumn);
         }
 */
+        AtomicBoolean improved = new AtomicBoolean(true);
 
-        xj.stream()
-                .boxed()
-                .forEach(j -> {
-                    List<Integer> rowsCoveredByOneColumn = new ArrayList<>();
-                    List<Integer> bj = getRowsCoveredByColumn(j);
-                    for (int rowIndex : bj) {
-                        if (u[rowIndex] == 1) {
-                            rowsCoveredByOneColumn.add(rowIndex);
+        while (improved.get()) {
+
+            improved.set(false);
+
+            xj.stream()
+                    .boxed()
+                    .map(j -> new Tuple2<>(j, getCost(j)))
+                    .sorted(Collections.reverseOrder(Comparator.comparing(Tuple2::getT2)))
+                    .map(Tuple2::getT1)
+                    .forEach(j -> {
+                        List<Integer> rowsCoveredByOneColumn = new ArrayList<>();
+                        List<Integer> bj = getRowsCoveredByColumn(j);
+                        for (int rowIndex : bj) {
+                            if (u[rowIndex] == 1) {
+                                rowsCoveredByOneColumn.add(rowIndex);
+                            }
                         }
-                    }
-                    int Pj = rowsCoveredByOneColumn.size();
-                    if (Pj == 0) {
-                        xj.clear(j);
-                        updateUi(u, j, false);
-                    }
-                    if (Pj == 1) {
-                        int row = rowsCoveredByOneColumn.get(0);
-                        int minCostColumn = findMinCostColumn(row); // Implement this function
-                        if (minCostColumn != j) {
+                        int Pj = rowsCoveredByOneColumn.size();
+                        if (Pj == 0) {
                             xj.clear(j);
-                            xj.set(minCostColumn);
                             updateUi(u, j, false);
-                            updateUi(u, minCostColumn, true);
+                            improved.set(true);
                         }
-                    }
-                    if (Pj == 2) {
-                        int row1 = rowsCoveredByOneColumn.get(0);
-                        int row2 = rowsCoveredByOneColumn.get(1);
-
-                        int minCostColumn1 = findMinCostColumn(row1); // Implement this function
-                        int minCostColumn2 = findMinCostColumn(row2); // Implement this function
-
-                        int sumCosts = calculateColumnCost(minCostColumn1) + calculateColumnCost(minCostColumn2);
-
-                        if (minCostColumn1 != minCostColumn2 && sumCosts <= calculateColumnCost(j)) {
-                            xj.clear(j);
-                            xj.set(minCostColumn1);
-                            xj.set(minCostColumn2);
-                            updateUi(u, j, false);
-                            updateUi(u, minCostColumn1, true);
-                            updateUi(u, minCostColumn2, true);
-                        } else if (minCostColumn1 == minCostColumn2 && minCostColumn1 != j) {
-                            xj.clear(j);
-                            xj.set(minCostColumn1);
-                            updateUi(u, j, false);
-                            updateUi(u, minCostColumn1, true);
+                        if (Pj == 1) {
+                            int row = rowsCoveredByOneColumn.get(0);
+                            int minCostColumn = findMinCostColumn(row); // Implement this function
+                            if (minCostColumn != j) {
+                                xj.clear(j);
+                                xj.set(minCostColumn);
+                                updateUi(u, j, false);
+                                updateUi(u, minCostColumn, true);
+                                improved.set(true);
+                            }
                         }
-                    }
-                    if (Pj == 3) {
-                        int row1 = rowsCoveredByOneColumn.get(0);
-                        int row2 = rowsCoveredByOneColumn.get(1);
-                        int row3 = rowsCoveredByOneColumn.get(2);
+                        if (Pj == 2) {
+                            int row1 = rowsCoveredByOneColumn.get(0);
+                            int row2 = rowsCoveredByOneColumn.get(1);
 
-                        int minCostColumn1 = findMinCostColumn(row1); // Implement this function
-                        int minCostColumn2 = findMinCostColumn(row2); // Implement this function
-                        int minCostColumn3 = findMinCostColumn(row3); // Implement this function
+                            int minCostColumn1 = findMinCostColumn(row1); // Implement this function
+                            int minCostColumn2 = findMinCostColumn(row2); // Implement this function
 
-                        int sumCosts = calculateColumnCost(minCostColumn1) + calculateColumnCost(minCostColumn2) + calculateColumnCost(minCostColumn3);
+                            int sumCosts = calculateColumnCost(minCostColumn1) + calculateColumnCost(minCostColumn2);
 
-                        if (minCostColumn1 != minCostColumn2 && minCostColumn1 != minCostColumn3 && minCostColumn2 != minCostColumn3 && sumCosts <= calculateColumnCost(j)) {
-                            xj.clear(j);
-                            xj.set(minCostColumn1);
-                            xj.set(minCostColumn2);
-                            xj.set(minCostColumn3);
-                            updateUi(u, j, false);
-                            updateUi(u, minCostColumn1, true);
-                            updateUi(u, minCostColumn2, true);
-                            updateUi(u, minCostColumn3, true);
-                        } else if (minCostColumn1 == minCostColumn2 && minCostColumn2 == minCostColumn3 && minCostColumn1 != j) {
-                            xj.clear(j);
-                            xj.set(minCostColumn1);
-                            updateUi(u, j, false);
-                            updateUi(u, minCostColumn1, true);
-                        } else if (minCostColumn1 == minCostColumn2 && minCostColumn1 != minCostColumn3 && sumCosts <= calculateColumnCost(j)) {
-                            xj.clear(j);
-                            xj.set(minCostColumn1);
-                            xj.set(minCostColumn3);
-                            updateUi(u, j, false);
-                            updateUi(u, minCostColumn1, true);
-                            updateUi(u, minCostColumn3, true);
-                        } else if (minCostColumn1 == minCostColumn3 && minCostColumn1 != minCostColumn2 && sumCosts <= calculateColumnCost(j)) {
-                            xj.clear(j);
-                            xj.set(minCostColumn1);
-                            xj.set(minCostColumn2);
-                            updateUi(u, j, false);
-                            updateUi(u, minCostColumn1, true);
-                            updateUi(u, minCostColumn2, true);
-                        } else if (minCostColumn2 == minCostColumn3 && minCostColumn2 != minCostColumn1 && sumCosts <= calculateColumnCost(j)) {
-                            xj.clear(j);
-                            xj.set(minCostColumn2);
-                            xj.set(minCostColumn1);
-                            updateUi(u, j, false);
-                            updateUi(u, minCostColumn2, true);
-                            updateUi(u, minCostColumn1, true);
+                            if (minCostColumn1 != minCostColumn2 && sumCosts <= calculateColumnCost(j)) {
+                                xj.clear(j);
+                                xj.set(minCostColumn1);
+                                xj.set(minCostColumn2);
+                                updateUi(u, j, false);
+                                updateUi(u, minCostColumn1, true);
+                                updateUi(u, minCostColumn2, true);
+                                improved.set(true);
+                            } else if (minCostColumn1 == minCostColumn2 && minCostColumn1 != j) {
+                                xj.clear(j);
+                                xj.set(minCostColumn1);
+                                updateUi(u, j, false);
+                                updateUi(u, minCostColumn1, true);
+                                improved.set(true);
+                            }
                         }
-                    }
-                });
+                        if (Pj == 3) {
+                            int row1 = rowsCoveredByOneColumn.get(0);
+                            int row2 = rowsCoveredByOneColumn.get(1);
+                            int row3 = rowsCoveredByOneColumn.get(2);
 
+                            int minCostColumn1 = findMinCostColumn(row1); // Implement this function
+                            int minCostColumn2 = findMinCostColumn(row2); // Implement this function
+                            int minCostColumn3 = findMinCostColumn(row3); // Implement this function
+
+                            int sumCosts = calculateColumnCost(minCostColumn1) + calculateColumnCost(minCostColumn2) + calculateColumnCost(minCostColumn3);
+
+                            if (minCostColumn1 != minCostColumn2 && minCostColumn1 != minCostColumn3 && minCostColumn2 != minCostColumn3 && sumCosts <= calculateColumnCost(j)) {
+                                xj.clear(j);
+                                xj.set(minCostColumn1);
+                                xj.set(minCostColumn2);
+                                xj.set(minCostColumn3);
+                                updateUi(u, j, false);
+                                updateUi(u, minCostColumn1, true);
+                                updateUi(u, minCostColumn2, true);
+                                updateUi(u, minCostColumn3, true);
+                                improved.set(true);
+                            } else if (minCostColumn1 == minCostColumn2 && minCostColumn2 == minCostColumn3 && minCostColumn1 != j) {
+                                xj.clear(j);
+                                xj.set(minCostColumn1);
+                                updateUi(u, j, false);
+                                updateUi(u, minCostColumn1, true);
+                            } else if (minCostColumn1 == minCostColumn2 && minCostColumn1 != minCostColumn3 && sumCosts <= calculateColumnCost(j)) {
+                                xj.clear(j);
+                                xj.set(minCostColumn1);
+                                xj.set(minCostColumn3);
+                                updateUi(u, j, false);
+                                updateUi(u, minCostColumn1, true);
+                                updateUi(u, minCostColumn3, true);
+                                improved.set(true);
+                            } else if (minCostColumn1 == minCostColumn3 && minCostColumn1 != minCostColumn2 && sumCosts <= calculateColumnCost(j)) {
+                                xj.clear(j);
+                                xj.set(minCostColumn1);
+                                xj.set(minCostColumn2);
+                                updateUi(u, j, false);
+                                updateUi(u, minCostColumn1, true);
+                                updateUi(u, minCostColumn2, true);
+                                improved.set(true);
+                            } else if (minCostColumn2 == minCostColumn3 && minCostColumn2 != minCostColumn1 && sumCosts <= calculateColumnCost(j)) {
+                                xj.clear(j);
+                                xj.set(minCostColumn2);
+                                xj.set(minCostColumn1);
+                                updateUi(u, j, false);
+                                updateUi(u, minCostColumn2, true);
+                                updateUi(u, minCostColumn1, true);
+                                improved.set(true);
+                            }
+                        }
+                    });
+        }
         return xj;
     }
 

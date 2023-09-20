@@ -22,9 +22,9 @@ public class Initialization {
     }
 
     public BitSet createSolution(int foodNumber) {
-        // return this.abcscp.createSolution(foodNumber);
-        //return this.randomMethod.createSolution();
-        return this.randomHeuristic.createSolution();
+        return this.abcscp.createSolution(foodNumber);
+        // return this.randomMethod.createSolution();
+        // return this.randomHeuristic.createSolution();
         // return this.iConstruction.createSolution();
     }
 }
