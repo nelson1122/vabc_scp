@@ -9,9 +9,9 @@ import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static main.java.config.Parameters.FOOD_NUMBER;
 import static main.java.variables.ScpVars.COLUMNS;
 import static main.java.variables.ScpVars.ROWS;
 import static main.java.variables.ScpVars.getColumnsCoveringRow;
@@ -51,8 +51,11 @@ public class RowWeightedMutation {
         BitSet xjMutation = (BitSet) xj.clone();
         List<Integer> uncoveredRows = cUtils.uncoveredRowsStream(xjMutation);
 
+        int randomFood = cUtils.randomNumber(FOOD_NUMBER);
+        BitSet rfs = vr.getFoodSource(randomFood);
+
         calculateInitialPriority();
-        calculateInitialScore(xjMutation);
+        calculateInitialScore(rfs);
         int colDrop = 0;
         int colAdd = 0;
 
