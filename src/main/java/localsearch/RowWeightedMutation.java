@@ -74,7 +74,7 @@ public class RowWeightedMutation {
                         .map(j -> new Tuple2<>(j, vr.getFoodBits(foodNumber)[j]))
                         .sorted(Comparator.comparing(Tuple2::getT2))
                         .map(Tuple2::getT1)
-                        .collect(Collectors.toList()).get(0);
+                        .toList().get(0);
 
                 updateSolutionDrop(foodNumber, colDrop, xjMutation);
                 uncoveredRows = cUtils.uncoveredRowsStream(xjMutation);
@@ -96,7 +96,7 @@ public class RowWeightedMutation {
                         .map(j -> new Tuple2<>(j, vr.getFoodBits(foodNumber)[j]))
                         .sorted(Comparator.comparing(Tuple2::getT2))
                         .map(Tuple2::getT1)
-                        .collect(Collectors.toList()).get(0);
+                        .toList().get(0);
 
                 updateSolutionAdd(foodNumber, colAdd, xjMutation);
                 uncoveredRows = cUtils.uncoveredRowsStream(xjMutation);
@@ -155,7 +155,7 @@ public class RowWeightedMutation {
                 rUtils.getUncoveredRowsCoveredByColumn(uncoveredRows, rowsCoveredByColumn);
 
         double score = uncoveredRowsCovered.stream()
-                .mapToDouble(j -> (double) wi[j] / getCost(j))
+                .mapToDouble(j -> (double) wi[j] / getCost(columnIndex))
                 .sum();
         score = Math.round(score * 100.0) / 100.0;
         sj[columnIndex] = score;
@@ -172,10 +172,12 @@ public class RowWeightedMutation {
                     BitSet Bh = getRowsCoveredByColumnBitset(h);
                     Bh.and(Bj);
 
-                    double score = sj[h] + Bh.stream()
-                            .boxed()
-                            .mapToDouble(ui -> (double) wi[ui] / getCost(h))
-                            .sum();
+                    double sum = 0.0;
+                    for (int i : Bh.stream().boxed().toList()) {
+                        sum += ((double) wi[i] / getCost(h));
+                    }
+
+                    double score = sj[h] + sum;
 
                     score = Math.round(score * 100.0) / 100.0;
                     sj[h] = score;
@@ -196,10 +198,12 @@ public class RowWeightedMutation {
                     BitSet Bh = getRowsCoveredByColumnBitset(h);
                     Bh.and(Bj);
 
-                    double score = sj[h] - Bh.stream()
-                            .boxed()
-                            .mapToDouble(i -> (double) wi[i] / getCost(h))
-                            .sum();
+                    double sum = 0.0;
+                    for (int i : Bh.stream().boxed().toList()) {
+                        sum += ((double) wi[i] / getCost(h));
+                    }
+
+                    double score = sj[h] - sum;
 
                     score = Math.round(score * 100.0) / 100.0;
                     sj[h] = score;

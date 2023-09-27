@@ -38,11 +38,11 @@ public class Main {
 //            "scpnrf3.txt",
 //            "scpnrf4.txt",
 //            "scpnrf5.txt",
+            "scpnrf5.txt",
+            "scpnrg2.txt",
             "scpnrh1.txt",
             "scpnrh2.txt",
-            "scpnrh3.txt",
-            "scpnrh4.txt",
-            "scpnrh5.txt",
+//            "scpnrh5.txt",
     };
 
     static int seed = 0;
@@ -53,9 +53,9 @@ public class Main {
         logger.log("University of Cauca, 2023");
         logger.log("Problems Group: [ " + groupName + " ]");
 
-        runABCSCPMonoThread();
+//        runABCSCPMonoThread();
 //        runABCSCPMonoThread2();
-//        runABCSCPMultiThread();
+        runABCSCPMultiThread();
 
         logger.log("Algorithm has finished!");
     }
@@ -74,7 +74,7 @@ public class Main {
                         IntStream.range(0, RUNTIME)
                                 .sorted()
                                 .mapToObj(rIndex -> forkJoinPool.submit(() -> {
-                                    seed = seed + 100;
+                                    seed = seed + 80;
                                     logger.setSEED(rIndex, seed);
                                     AbcVars vr = new AbcVars(seed);
                                     BeeColony bee = new BeeColony(vr);

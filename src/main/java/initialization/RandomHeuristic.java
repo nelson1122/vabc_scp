@@ -57,7 +57,7 @@ public class RandomHeuristic {
                 .sorted(Collections.reverseOrder(Comparator.comparingDouble(Tuple2::getT2)))
                 .limit(10)
                 .map(Tuple2::getT1)
-                .collect(Collectors.toList());
+                .toList();
 
         List<Integer> lColumns = lRows.stream()
                 .map(ScpVars::getColumnsCoveringRow)
@@ -72,7 +72,7 @@ public class RandomHeuristic {
                 //.sorted(Collections.reverseOrder(Comparator.comparingDouble(Tuple2::getT2)))
                 .limit(5)
                 .map(Tuple2::getT1)
-                .collect(Collectors.toList());
+                .toList();
 
         int randomColumn = cUtils.randomNumber(5);
         return lColumns.get(randomColumn);
