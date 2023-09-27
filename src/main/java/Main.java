@@ -53,9 +53,9 @@ public class Main {
         logger.log("University of Cauca, 2023");
         logger.log("Problems Group: [ " + groupName + " ]");
 
-        runABCSCPMonoThread();
+//        runABCSCPMonoThread();
 //        runABCSCPMonoThread2();
-//        runABCSCPMultiThread();
+        runABCSCPMultiThread();
 
         logger.log("Algorithm has finished!");
     }
@@ -74,7 +74,7 @@ public class Main {
                         IntStream.range(0, RUNTIME)
                                 .sorted()
                                 .mapToObj(rIndex -> forkJoinPool.submit(() -> {
-                                    seed = seed + 100;
+                                    seed = seed + 70;
                                     logger.setSEED(rIndex, seed);
                                     AbcVars vr = new AbcVars(seed);
                                     BeeColony bee = new BeeColony(vr);
@@ -114,7 +114,7 @@ public class Main {
     public static void runABCSCPMonoThread() {
         try {
 //            Problem.read("main/resources/scpnrg1.txt");
-            Problem.read("src/main/resources/scpnrf5.txt");
+            Problem.read("src/main/resources/scp41.txt");
             AbcVars vr = new AbcVars(140);
             BeeColony bee = new BeeColony(vr);
             bee.initial();
