@@ -15,7 +15,7 @@ import static main.java.config.Parameters.COL_DROP_2;
 public class BeeUtils {
     private final AbcVars vr;
     private final CommonUtils cUtils;
-    private List<Integer> addedColumns;
+//    private List<Integer> addedColumns;
 
     public BeeUtils(AbcVars v) {
         this.vr = v;
@@ -23,7 +23,7 @@ public class BeeUtils {
     }
 
     public void addColumns(int foodNumber, BitSet xj, List<Integer> distinctColumns) {
-        addedColumns = new ArrayList<>();
+//        addedColumns = new ArrayList<>();
 
         int n = xj.cardinality();
         int dc = distinctColumns.size();
@@ -47,7 +47,7 @@ public class BeeUtils {
                 .limit(colAdd)
                 .boxed()
                 .forEach(j -> {
-                    addedColumns.add(j);
+//                    addedColumns.add(j);
                     vr.increaseFoodBits(foodNumber, j);
                     xj.set(j);
                 });
@@ -68,7 +68,7 @@ public class BeeUtils {
 
         vr.getRANDOM().ints(0, n)
                 .map(columns::get)
-                .filter(j -> !addedColumns.contains(j))
+//                .filter(j -> !addedColumns.contains(j))
                 .distinct()
                 .limit(colDrop)
                 .boxed()

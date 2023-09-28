@@ -24,24 +24,24 @@ public class RowWeightedMutation {
     private final AbcVars vr;
     private final CommonUtils cUtils;
     private final RepairUtils rUtils;
-    private int[] wi;
-    private double[] pj;
-    private double[] sj;
+    private int[] w;
+    private double[] p;
+    private double[] s;
     private final int STOPCRITERIA = 50;
 
     public RowWeightedMutation(AbcVars vr) {
         this.vr = vr;
         this.cUtils = new CommonUtils(vr);
         this.rUtils = new RepairUtils(vr);
-        this.wi = new int[ROWS];
-        this.pj = new double[COLUMNS];
-        this.sj = new double[COLUMNS];
+        this.w = new int[ROWS];
+        this.p = new double[COLUMNS];
+        this.s = new double[COLUMNS];
     }
 
     public BitSet apply(BitSet xj, int foodNumber) {
-        Arrays.fill(wi, 1);
-        Arrays.fill(pj, 0.0);
-        Arrays.fill(sj, 0.0);
+        Arrays.fill(w, 1);
+        Arrays.fill(p, 0.0);
+        Arrays.fill(s, 0.0);
 
         xj = applyMutationLocalSearch(xj, foodNumber);
         return xj;
@@ -67,12 +67,12 @@ public class RowWeightedMutation {
             while (uncoveredRows.isEmpty()) {
                 double maxScore = xjMutation.stream()
                         .boxed()
-                        .mapToDouble(j -> sj[j])
+                        .mapToDouble(j -> s[j])
                         .max()
                         .getAsDouble();
 
                 colDrop = xjMutation.stream()
-                        .filter(j -> sj[j] == maxScore)
+                        .filter(j -> s[j] == maxScore)
                         .boxed()
                         .map(j -> new Tuple2<>(j, vr.getFoodBits(foodNumber)[j]))
                         .sorted(Comparator.comparing(Tuple2::getT2))
@@ -90,12 +90,12 @@ public class RowWeightedMutation {
                 List<Integer> cols = getColumnsCoveringRow(uncoveredRow);
 
                 double maxScore = cols.stream()
-                        .mapToDouble(j -> sj[j])
+                        .mapToDouble(j -> s[j])
                         .max()
                         .getAsDouble();
 
                 colAdd = cols.stream()
-                        .filter(j -> sj[j] == maxScore)
+                        .filter(j -> s[j] == maxScore)
                         .map(j -> new Tuple2<>(j, vr.getFoodBits(foodNumber)[j]))
                         .sorted(Comparator.comparing(Tuple2::getT2))
                         .map(Tuple2::getT1)
@@ -120,7 +120,7 @@ public class RowWeightedMutation {
     private void updateSolutionAdd(int foodNumber, int columnIndex, BitSet xj) {
         xj.set(columnIndex);
         vr.increaseFoodBits(foodNumber, columnIndex);
-        sj[columnIndex] = (-1) * sj[columnIndex];
+        s[columnIndex] = (-1) * s[columnIndex];
     }
 
     private void updateSolutionDrop(int foodNumber, int columnIndex, BitSet xj) {
@@ -134,7 +134,7 @@ public class RowWeightedMutation {
                 .forEach(j -> {
                     List<Integer> Bj = getRowsCoveredByColumn(j);
                     double priority = (double) Bj.size() / getCost(j);
-                    pj[j] = priority;
+                    p[j] = priority;
                 });
     }
 
@@ -144,11 +144,11 @@ public class RowWeightedMutation {
                 .forEach(j -> {
                     double score;
                     if (xj.get(j)) {
-                        score = (-1) * Math.round(pj[j] * 100.0) / 100.0;
+                        score = (-1) * Math.round(p[j] * 100.0) / 100.0;
                     } else {
-                        score = Math.round(pj[j] * 100.0) / 100.0;
+                        score = Math.round(p[j] * 100.0) / 100.0;
                     }
-                    sj[j] = score;
+                    s[j] = score;
                 });
     }
 
@@ -158,10 +158,10 @@ public class RowWeightedMutation {
                 rUtils.getUncoveredRowsCoveredByColumn(uncoveredRows, rowsCoveredByColumn);
 
         double score = uncoveredRowsCovered.stream()
-                .mapToDouble(j -> (double) wi[j] / getCost(columnIndex))
+                .mapToDouble(j -> (double) w[j] / getCost(columnIndex))
                 .sum();
         score = Math.round(score * 100.0) / 100.0;
-        sj[columnIndex] = score;
+        s[columnIndex] = score;
     }
 
     private void updateScoreColumnsInSolution(BitSet xj, int columnIndex) {
@@ -177,18 +177,18 @@ public class RowWeightedMutation {
 
                     double sum = 0.0;
                     for (int i : Bh.stream().boxed().toList()) {
-                        sum += ((double) wi[i] / getCost(h));
+                        sum += ((double) w[i] / getCost(h));
                     }
 
-                    double score = sj[h] + sum;
+                    double score = s[h] + sum;
 
                     score = Math.round(score * 100.0) / 100.0;
-                    sj[h] = score;
+                    s[h] = score;
                 });
     }
 
     private void updateRowWeights(List<Integer> uncoveredRows) {
-        uncoveredRows.forEach(i -> wi[i]++);
+        uncoveredRows.forEach(i -> w[i]++);
     }
 
     private void updateScoreColumnsNotInSolution(BitSet xj, int columnIndex) {
@@ -203,13 +203,13 @@ public class RowWeightedMutation {
 
                     double sum = 0.0;
                     for (int i : Bh.stream().boxed().toList()) {
-                        sum += ((double) wi[i] / getCost(h));
+                        sum += ((double) w[i] / getCost(h));
                     }
 
-                    double score = sj[h] - sum;
+                    double score = s[h] - sum;
 
                     score = Math.round(score * 100.0) / 100.0;
-                    sj[h] = score;
+                    s[h] = score;
                 });
     }
 
