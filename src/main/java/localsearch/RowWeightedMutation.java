@@ -79,7 +79,7 @@ public class RowWeightedMutation {
                         .map(Tuple2::getT1)
                         .toList().get(0);
 
-                updateSolutionDrop(foodNumber, colDrop, xjMutation);
+                updateSolutionDrop(colDrop, xjMutation);
                 uncoveredRows = cUtils.uncoveredRowsStream(xjMutation);
                 updateScore(colDrop, uncoveredRows);
             }
@@ -101,7 +101,7 @@ public class RowWeightedMutation {
                         .map(Tuple2::getT1)
                         .toList().get(0);
 
-                updateSolutionAdd(foodNumber, colAdd, xjMutation);
+                updateSolutionAdd(colAdd, xjMutation);
                 uncoveredRows = cUtils.uncoveredRowsStream(xjMutation);
                 updateScoreColumnsInSolution(xjMutation, colAdd);
                 updateRowWeights(uncoveredRows);
@@ -117,13 +117,13 @@ public class RowWeightedMutation {
         return xj;
     }
 
-    private void updateSolutionAdd(int foodNumber, int columnIndex, BitSet xj) {
+    private void updateSolutionAdd(int columnIndex, BitSet xj) {
         xj.set(columnIndex);
         timestamp[columnIndex]++;
         s[columnIndex] = (-1) * s[columnIndex];
     }
 
-    private void updateSolutionDrop(int foodNumber, int columnIndex, BitSet xj) {
+    private void updateSolutionDrop(int columnIndex, BitSet xj) {
         xj.clear(columnIndex);
         timestamp[columnIndex]++;
     }
