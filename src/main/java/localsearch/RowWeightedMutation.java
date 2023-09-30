@@ -38,16 +38,16 @@ public class RowWeightedMutation {
         this.s = new double[COLUMNS];
     }
 
-    public BitSet apply(BitSet xj, int foodNumber) {
+    public BitSet apply(BitSet xj) {
         Arrays.fill(w, 1);
         Arrays.fill(p, 0.0);
         Arrays.fill(s, 0.0);
 
-        xj = applyLocalSearch(xj, foodNumber);
+        xj = applyLocalSearch(xj);
         return xj;
     }
 
-    public BitSet applyLocalSearch(BitSet xj, int foodNumber) {
+    public BitSet applyLocalSearch(BitSet xj) {
         BitSet xjMutation = (BitSet) xj.clone();
         List<Integer> uncoveredRows = cUtils.uncoveredRowsStream(xjMutation);
 
@@ -91,7 +91,7 @@ public class RowWeightedMutation {
 
                 double maxScore = cols.stream()
                         .mapToDouble(j -> s[j])
-                        .min()
+                        .max()
                         .getAsDouble();
 
                 colAdd = cols.stream()
