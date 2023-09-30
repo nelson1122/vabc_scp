@@ -27,7 +27,7 @@ public class RowWeightedMutation {
     private int[] w;
     private double[] p;
     private double[] s;
-    private final int STOPCRITERIA = 50;
+    private int[] timestamp = new int[COLUMNS];
 
     public RowWeightedMutation(AbcVars vr) {
         this.vr = vr;
@@ -43,11 +43,11 @@ public class RowWeightedMutation {
         Arrays.fill(p, 0.0);
         Arrays.fill(s, 0.0);
 
-        xj = applyMutationLocalSearch(xj, foodNumber);
+        xj = applyLocalSearch(xj, foodNumber);
         return xj;
     }
 
-    public BitSet applyMutationLocalSearch(BitSet xj, int foodNumber) {
+    public BitSet applyLocalSearch(BitSet xj, int foodNumber) {
         BitSet xjMutation = (BitSet) xj.clone();
         List<Integer> uncoveredRows = cUtils.uncoveredRowsStream(xjMutation);
 
@@ -74,7 +74,7 @@ public class RowWeightedMutation {
                 colDrop = xjMutation.stream()
                         .filter(j -> s[j] == maxScore)
                         .boxed()
-                        .map(j -> new Tuple2<>(j, vr.getFoodBits(foodNumber)[j]))
+                        .map(j -> new Tuple2<>(j, timestamp[j]))
                         .sorted(Comparator.comparing(Tuple2::getT2))
                         .map(Tuple2::getT1)
                         .toList().get(0);
@@ -91,12 +91,12 @@ public class RowWeightedMutation {
 
                 double maxScore = cols.stream()
                         .mapToDouble(j -> s[j])
-                        .max()
+                        .min()
                         .getAsDouble();
 
                 colAdd = cols.stream()
                         .filter(j -> s[j] == maxScore)
-                        .map(j -> new Tuple2<>(j, vr.getFoodBits(foodNumber)[j]))
+                        .map(j -> new Tuple2<>(j, timestamp[j]))
                         .sorted(Comparator.comparing(Tuple2::getT2))
                         .map(Tuple2::getT1)
                         .toList().get(0);
@@ -119,13 +119,13 @@ public class RowWeightedMutation {
 
     private void updateSolutionAdd(int foodNumber, int columnIndex, BitSet xj) {
         xj.set(columnIndex);
-        vr.increaseFoodBits(foodNumber, columnIndex);
+        timestamp[columnIndex]++;
         s[columnIndex] = (-1) * s[columnIndex];
     }
 
     private void updateSolutionDrop(int foodNumber, int columnIndex, BitSet xj) {
         xj.clear(columnIndex);
-        vr.increaseFoodBits(foodNumber, columnIndex);
+        timestamp[columnIndex]++;
     }
 
     private void calculateInitialPriority() {
@@ -217,6 +217,14 @@ public class RowWeightedMutation {
     private boolean solutionImproved(BitSet currXj, BitSet newXj) {
         int currFiness = cUtils.calculateFitnessOne(currXj);
         int newFitness = cUtils.calculateFitnessOneStream(newXj);
+
+        if (currFiness > newFitness) {
+            System.out.println("Fitness improved => [" + currFiness + ", " + newFitness + "]");
+            if (newFitness < 156) {
+                System.out.println("BEST REACHED");
+            }
+        }
+
         return currFiness > newFitness;
     }
 }
